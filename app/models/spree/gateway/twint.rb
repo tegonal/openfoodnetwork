@@ -66,6 +66,10 @@ module Spree
 
       # This method is only used for Twint payment method
       def create_twint_payment_intent
+        if @order.total < 1
+          raise Core::GatewayError, I18n.t('spree.twint.minimum_amount_error', amount: '1 CHF')
+        end
+
         payment_intent = Stripe::PaymentIntent.create(
           amount: (@order.total * 100).to_i, # Convert to cents
           currency: 'chf', # Swiss Francs for Twint
