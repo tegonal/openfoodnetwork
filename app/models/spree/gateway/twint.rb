@@ -31,7 +31,6 @@ module Spree
       def external_payment_url(options)
         @order = options[:order]
         @twint_client_secret = create_twint_payment_intent
-        sleep(5) # TODO: temporary fix: Wait for the PaymentIntent to be created 
         @confirm_payment = confirm_payment(@twint_client_secret)
         @order.pending_payments.last.update(response_code: @confirm_payment.id)
         @confirm_payment.next_action.redirect_to_url.url
