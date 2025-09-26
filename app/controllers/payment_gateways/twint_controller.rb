@@ -37,10 +37,23 @@ module PaymentGateways
     end
 
     def validate_payment_intent
-      return if params["redirect_status"] == "succeeded" && valid_payment_intent?
+      max_attempts = 10
+      attempts = 0
 
-      processing_failed
-      redirect_to order_failed_route
+      # TODO: temporary solution: Poll for the redirect_status to change from "pending"
+      while params["redirect_status"] == "pending" && attempts < max_attempts
+        sleep(1) # Wait 1 second before retrying
+        attempts += 1
+
+        # Fetch the updated status from Stripe
+        params["redirect_status"] = fetch_redirect_status_from_stripe(params["payment_intent"])
+      end
+      
+      # Handle timeout or invalid status
+      if params["redirect_status"] != "succeeded" || !valid_payment_intent?
+        processing_failed
+        redirect_to order_failed_route
+      end
     end
 
     def valid_payment_intent?
@@ -65,6 +78,21 @@ module PaymentGateways
         payment.adjustment&.update_columns(eligible: false, state: "finalized")
       end
       flash[:notice] = I18n.t("checkout.payment_cancelled_due_to_stock")
+    end
+
+    def fetch_redirect_status_from_stripe(payment_intent_id)
+      return nil unless payment_intent_id
+
+      begin
+        # Fetch the payment intent from Stripe
+        payment_intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
+
+        # Extract the redirect status from the payment intent
+        payment_intent["status"] # This could be "succeeded", "requires_payment_method", "failed", etc.
+      rescue Stripe::StripeError => e
+        Rails.logger.error("Failed to fetch payment intent #{payment_intent_id}: #{e.message}")
+        nil
+      end
     end
   end
 end
