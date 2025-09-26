@@ -12,18 +12,25 @@ module PaymentGateways
     def confirm
       validate_stock
 
-      redirect_to order_failed_route if @any_out_of_stock == true
+      # Redirect to the failure page if any items are out of stock
+      redirect_to order_failed_route and return if @any_out_of_stock == true
+
+      # Raise an error if there are no pending payments
       raise Core::GatewayError, Spree.t(:no_pending_payments) if @order.pending_payments.empty?
 
+      # Mark all pending payments as completed
       @order.pending_payments.each do |payment|
         payment.update_columns(state: "completed", captured_at: Time.zone.now)
       end
+
+      # Update the order's state to complete
       @order.update_columns(payment_state: "paid",
                             shipment_state: "ready",
                             state: "complete",
                             payment_total: @order.total,
                             completed_at: Time.zone.now)
 
+      # Redirect to the order completion route
       redirect_to order_completion_route
     end
 
@@ -40,7 +47,7 @@ module PaymentGateways
       max_attempts = 10
       attempts = 0
 
-      # TODO: temporary solution: Poll for the redirect_status to change from "pending"
+      # Poll for the redirect_status to change from "pending"
       while params["redirect_status"] == "pending" && attempts < max_attempts
         sleep(1) # Wait 1 second before retrying
         attempts += 1
@@ -48,11 +55,11 @@ module PaymentGateways
         # Fetch the updated status from Stripe
         params["redirect_status"] = fetch_redirect_status_from_stripe(params["payment_intent"])
       end
-      
+
       # Handle timeout or invalid status
       if params["redirect_status"] != "succeeded" || !valid_payment_intent?
         processing_failed
-        redirect_to order_failed_route
+        redirect_to order_failed_route and return # Redirect and stop further execution
       end
     end
 
