@@ -6,7 +6,6 @@ module PaymentGateways
     include OrderCompletion
 
     before_action :load_checkout_order, only: :confirm
-    before_action :validate_payment_intent, only: :confirm
     before_action :check_order_cycle_expiry, only: :confirm
 
     def confirm
@@ -14,6 +13,9 @@ module PaymentGateways
 
       # Redirect to the failure page if any items are out of stock
       redirect_to order_failed_route and return if @any_out_of_stock == true
+
+      # Validate the payment intent
+      validate_payment_intent
 
       # Raise an error if there are no pending payments
       raise Core::GatewayError, Spree.t(:no_pending_payments) if @order.pending_payments.empty?
@@ -44,15 +46,15 @@ module PaymentGateways
     end
 
     def validate_payment_intent
-      max_attempts = 10
+      max_attempts = 30
       attempts = 0
-
+      
+      params["redirect_status"] = "pending"
       # Poll for the redirect_status to change from "pending"
       while params["redirect_status"] == "pending" && attempts < max_attempts
+        Rails.logger.info("Attempt #{attempts}: redirect_status is #{params['redirect_status']}")
         sleep(1) # Wait 1 second before retrying
         attempts += 1
-
-        # Fetch the updated status from Stripe
         params["redirect_status"] = fetch_redirect_status_from_stripe(params["payment_intent"])
       end
 
