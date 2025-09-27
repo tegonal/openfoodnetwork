@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'core/gateway_error' 
+
 module PaymentGateways
   class TwintController < BaseController
     include OrderStockCheck
@@ -49,7 +51,6 @@ module PaymentGateways
       max_attempts = 30
       attempts = 0
       
-      params["redirect_status"] = "pending"
       # Poll for the redirect_status to change from "pending"
       while params["redirect_status"] == "pending" && attempts < max_attempts
         Rails.logger.info("Attempt #{attempts}: redirect_status is #{params['redirect_status']}")
@@ -66,13 +67,22 @@ module PaymentGateways
     end
 
     def valid_payment_intent?
+      Rails.logger.info("Validating payment intent: #{params['payment_intent']}")
+      Rails.logger.info("Order state: #{@order.state}")
+      Rails.logger.info("Last payment response code: #{last_payment&.response_code}")
+
       @valid_payment_intent ||= params["payment_intent"]&.starts_with?("pi_") &&
                                 order_and_payment_valid?
     end
 
     def order_and_payment_valid?
-      @order.state.in?(["payment", "confirmation"]) &&
-        last_payment&.response_code == params["payment_intent"]
+      valid_state = @order.state.in?(["payment", "confirmation"])
+      valid_response_code = last_payment&.response_code == params["payment_intent"]
+
+      Rails.logger.info("Order state valid: #{valid_state}")
+      Rails.logger.info("Payment response code valid: #{valid_response_code}")
+
+      valid_state && valid_response_code
     end
 
     def last_payment
