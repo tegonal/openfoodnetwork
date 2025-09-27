@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'core/gateway_error' 
-
 module PaymentGateways
   class TwintController < BaseController
     include OrderStockCheck
