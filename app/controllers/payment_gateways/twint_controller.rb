@@ -57,9 +57,11 @@ module PaymentGateways
         sleep(1) # Wait 1 second before retrying
         attempts += 1
         params["redirect_status"] = fetch_redirect_status_from_stripe(params["payment_intent"])
+        Rails.logger.info("Attempt #{attempts}: redirect_status after checking again is #{params['redirect_status']}")
       end
 
       # Handle timeout or invalid status
+      Rails.logger.info("Good to go now as redirect status is #{params['redirect_status']}")
       if params["redirect_status"] != "succeeded" || !valid_payment_intent?
         processing_failed
         redirect_to order_failed_route and return # Redirect and stop further execution
