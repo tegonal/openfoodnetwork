@@ -17,20 +17,24 @@ module PaymentGateways
       # Validate the payment intent
       validate_payment_intent
 
-      # Mark all pending payments as completed
-      @order.pending_payments.each do |payment|
-        payment.update_columns(state: "completed", captured_at: Time.zone.now)
+      if params["redirect_status"] != "succeeded" || !valid_payment_intent?
+        redirect_to order_failed_route and return # Redirect and stop further execution
+      else
+        # Mark all pending payments as completed
+        @order.pending_payments.each do |payment|
+          payment.update_columns(state: "completed", captured_at: Time.zone.now)
+        end
+
+        # Update the order's state to complete
+        @order.update_columns(payment_state: "paid",
+                              shipment_state: "ready",
+                              state: "complete",
+                              payment_total: @order.total,
+                              completed_at: Time.zone.now)
+
+        # Redirect to the order completion route
+        redirect_to order_completion_route
       end
-
-      # Update the order's state to complete
-      @order.update_columns(payment_state: "paid",
-                            shipment_state: "ready",
-                            state: "complete",
-                            payment_total: @order.total,
-                            completed_at: Time.zone.now)
-
-      # Redirect to the order completion route
-      redirect_to order_completion_route
     end
 
     private
