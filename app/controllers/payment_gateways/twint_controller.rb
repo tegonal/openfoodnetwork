@@ -18,6 +18,7 @@ module PaymentGateways
       validate_payment_intent
 
       if params["redirect_status"] != "succeeded" || !valid_payment_intent?
+        processing_failed
         redirect_to order_failed_route 
       else
         # Mark all pending payments as completed
