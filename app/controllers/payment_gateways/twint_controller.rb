@@ -12,13 +12,13 @@ module PaymentGateways
       validate_stock
 
       # Redirect to the failure page if any items are out of stock
-      redirect_to order_failed_route and return if @any_out_of_stock == true
+      redirect_to order_failed_route if @any_out_of_stock == true
 
       # Validate the payment intent
       validate_payment_intent
 
       if params["redirect_status"] != "succeeded" || !valid_payment_intent?
-        redirect_to order_failed_route and return # Redirect and stop further execution
+        redirect_to order_failed_route 
       else
         # Mark all pending payments as completed
         @order.pending_payments.each do |payment|
