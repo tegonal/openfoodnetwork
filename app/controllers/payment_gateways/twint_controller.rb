@@ -17,9 +17,6 @@ module PaymentGateways
       # Validate the payment intent
       validate_payment_intent
 
-      # Raise an error if there are no pending payments
-      raise Core::GatewayError, Spree.t(:no_pending_payments) if @order.pending_payments.empty?
-
       # Mark all pending payments as completed
       @order.pending_payments.each do |payment|
         payment.update_columns(state: "completed", captured_at: Time.zone.now)
@@ -55,12 +52,11 @@ module PaymentGateways
         sleep(1) # Wait 1 second before retrying
         attempts += 1
         params["redirect_status"] = fetch_redirect_status_from_stripe(params["payment_intent"])
-        Rails.logger.info("Attempt #{attempts}: the new redirect_status is #{params['redirect_status']}")
+        Rails.logger.info("Attempt #{attempts}: the new redirect_status is#{params['redirect_status']}")
       end
 
       # Handle timeout or invalid status
       if params["redirect_status"] != "succeeded" || !valid_payment_intent?
-        processing_failed
         redirect_to order_failed_route and return # Redirect and stop further execution
       end
     end
