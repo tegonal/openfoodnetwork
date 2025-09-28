@@ -49,7 +49,7 @@ module Vine
     def connection
       jwt = jwt_generator.generate_token
       Faraday.new(
-        request: { timeout: 30 },
+        request: { timeout: 60 },
         headers: {
           'X-Authorization': "JWT #{jwt}",
           Accept: "application/json"
