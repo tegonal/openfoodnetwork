@@ -48,7 +48,7 @@ module PaymentGateways
     end
 
     def validate_payment_intent
-      max_attempts = 30
+      max_attempts = 12 
       attempts = 0
 
       # Poll for the redirect_status to change from "pending"
