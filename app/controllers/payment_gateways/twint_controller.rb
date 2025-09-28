@@ -52,7 +52,7 @@ module PaymentGateways
       attempts = 0
       
       # Poll for the redirect_status to change from "pending"
-      while params["redirect_status"] == "pending" && attempts < max_attempts
+      while params["redirect_status"].in?(["pending", "requires_action"]) && attempts < max_attempts
         Rails.logger.info("Attempt #{attempts}: redirect_status is #{params['redirect_status']}")
         sleep(1) # Wait 1 second before retrying
         attempts += 1
