@@ -50,11 +50,11 @@ module PaymentGateways
     def validate_payment_intent
       max_attempts = 30
       attempts = 0
-      
+
       # Poll for the redirect_status to change from "pending"
       while params["redirect_status"].in?(["pending", "requires_action"]) && attempts < max_attempts
         Rails.logger.info("Attempt #{attempts}: redirect_status is #{params['redirect_status']}")
-        sleep(1) # Wait 1 second before retrying
+        sleep(2) 
         attempts += 1
         params["redirect_status"] = fetch_redirect_status_from_stripe(params["payment_intent"])
         Rails.logger.info("Attempt #{attempts}: the new redirect_status is#{params['redirect_status']}")
