@@ -19,7 +19,7 @@ module PaymentGateways
 
       if params["redirect_status"] != "succeeded" || !valid_payment_intent?
         processing_failed
-        redirect_to order_failed_route 
+        redirect_to order_failed_route
       else
         # Mark all pending payments as completed
         @order.pending_payments.each do |payment|
@@ -49,6 +49,7 @@ module PaymentGateways
           Rails.logger.error("Failed to send confirmation email for order #{@order.number}: #{e.message}")
           Rails.logger.error(e.backtrace.join("\n"))
         end
+        @order.finalize!
         # Redirect to the order completion route
         redirect_to order_completion_route
       end
