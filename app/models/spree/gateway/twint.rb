@@ -44,12 +44,15 @@ module Spree
 
       def confirm_payment(payment_intent_id)
         Rails.logger.info("Executing Twint purchase method for PaymentIntent: #{payment_intent_id}")
+        Rails.logger.info("Twint PaymentIntent confirmation will use Stripe account: #{stripe_account_id}")
         Stripe::PaymentIntent.confirm(
           payment_intent_id,
           {
             return_url: payment_gateways_confirm_twint_url(order_id: @order.number,
                                                            order_token: @order.token),
             payment_method_data: { type: 'twint' }
+          }, {
+            stripe_account: stripe_account_id
           }
         )
       end
@@ -66,16 +69,20 @@ module Spree
 
       # This method is only used for Twint payment method
       def create_twint_payment_intent
+        Rails.logger.info("Twint PaymentIntent will use Stripe account: #{stripe_account_id}")
         if @order.total < 1
           raise Core::GatewayError, I18n.t('spree.twint.minimum_amount_error', amount: '1 CHF')
         end
 
         payment_intent = Stripe::PaymentIntent.create(
-          amount: (@order.total * 100).to_i, # Convert to cents
-          currency: 'chf', # Swiss Francs for Twint
-          payment_method_types: ['twint'],
-          transfer_data: {
-            destination: stripe_account_id
+          {
+            amount: (@order.total * 100).to_i,
+            currency: 'chf',
+            payment_method_types: ['twint'],
+            description: "Order ##{@order.number} - #{@order.email}"
+          },
+          {
+            stripe_account: stripe_account_id
           }
         )
         payment_intent.id
