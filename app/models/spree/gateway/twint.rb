@@ -79,7 +79,7 @@ module Spree
             amount: (@order.total * 100).to_i,
             currency: 'chf',
             payment_method_types: ['twint'],
-            description: "Order ##{@order.number} - #{@order.email}"
+            description: "Order ##{@order.number} - #{@order.email} - #{@order.bill_address&.firstname} #{@order.bill_address&.lastname}"
           },
           {
             stripe_account: stripe_account_id
