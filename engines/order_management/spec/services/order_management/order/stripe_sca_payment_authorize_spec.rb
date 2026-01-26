@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 module OrderManagement
   module Order
     RSpec.describe StripeScaPaymentAuthorize do
@@ -16,6 +14,15 @@ module OrderManagement
 
           it "does nothing" do
             expect(payment_authorize.call!).to eq nil
+          end
+        end
+
+        context "when the payment already requires 3D Secure authorization" do
+          let(:payment) { create(:payment, amount: 10, state: 'requires_authorization') }
+          before { allow(order).to receive(:pending_payments).once { [payment] } }
+
+          it "returns the payment without authorizing because it has already been authorized" do
+            expect(payment_authorize.call!).to eq payment
           end
         end
 
@@ -66,7 +73,7 @@ module OrderManagement
                 allow(PaymentMailer).to receive(:authorization_required) { mail_mock }
                 allow(payment).to receive(:authorize!) {
                   payment.state = "requires_authorization"
-                  payment.cvv_response_message = "https://stripe.com/redirect"
+                  payment.redirect_auth_url = "https://stripe.com/redirect"
                 }
               end
 

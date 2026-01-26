@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.describe 'enterprises.rake' do
-  include_context "rake"
-
   describe ':remove_enterprise' do
     context 'when the enterprises exists' do
       it 'removes the enterprise' do

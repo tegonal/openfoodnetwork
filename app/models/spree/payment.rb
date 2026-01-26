@@ -57,7 +57,7 @@ module Spree
     scope :failed, -> { with_state('failed') }
     scope :valid, -> { where.not(state: %w(failed invalid)) }
     scope :void, -> { with_state('void') }
-    scope :authorization_action_required, -> { where.not(cvv_response_message: nil) }
+    scope :authorization_action_required, -> { where.not(redirect_auth_url: nil) }
     scope :requires_authorization, -> { with_state("requires_authorization") }
     scope :with_payment_intent, ->(code) { where(response_code: code) }
 
@@ -101,6 +101,24 @@ module Spree
       end
 
       after_transition to: :completed, do: :set_captured_at
+      after_transition do |payment, transition|
+        # Catch any exceptions to prevent any rollback potentially
+        # preventing payment from going through
+        ActiveSupport::Notifications.instrument(
+          "ofn.payment_transition", payment: payment, event: transition.to
+        )
+      rescue StandardError => e
+        Rails.logger.fatal "ActiveSupport::Notification.instrument failed params: " \
+                           "<event_type:ofn.payment_transition> " \
+                           "<payment_id:#{payment.id}> " \
+                           "<event:#{transition.to}>"
+        Alert.raise(
+          e,
+          metadata: {
+            event_tye: "ofn.payment_transition", payment_id: payment.id, event: transition.to
+          }
+        )
+      end
     end
 
     def money
@@ -164,7 +182,7 @@ module Spree
     end
 
     def clear_authorization_url
-      update_attribute(:cvv_response_message, nil)
+      update_attribute(:redirect_auth_url, nil)
     end
 
     private

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 RSpec.describe IntegerArrayValidator do
   describe "internationalization" do
     it "has translation for NOT_ARRAY_ERROR" do
@@ -17,6 +15,7 @@ RSpec.describe IntegerArrayValidator do
     let(:instance) do
       Class.new do
         include ActiveModel::Validations
+
         attr_accessor :ids
 
         validates :ids, integer_array: true

@@ -1,6 +1,5 @@
 # frozen_string_literal: false
 
-require 'spec_helper'
 require 'open_food_network/permissions'
 
 RSpec.describe ProductImport::ProductImporter do
@@ -1032,8 +1031,6 @@ RSpec.describe ProductImport::ProductImporter do
     Spree::Product.find_by(name:).variants.first
   end
 end
-
-private
 
 def import_data(csv_data, args = {})
   import_user = args[:import_user] || admin

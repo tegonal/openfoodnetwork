@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.describe PaymentsRequiringActionQuery do
   subject(:result) { described_class.new(user).call }
 
@@ -9,11 +7,11 @@ RSpec.describe PaymentsRequiringActionQuery do
   let(:order) { create(:order, user:) }
 
   describe '#call' do
-    context "payment has a cvv_response_message" do
+    context "payment has a redirect_auth_url" do
       let(:payment) do
         create(:payment,
                order:,
-               cvv_response_message: "https://stripe.com/redirect",
+               redirect_auth_url: "https://stripe.com/redirect",
                state: "requires_authorization")
       end
 
@@ -22,9 +20,9 @@ RSpec.describe PaymentsRequiringActionQuery do
       end
     end
 
-    context "payment has no cvv_response_message" do
+    context "payment has no redirect_auth_url" do
       let(:payment) do
-        create(:payment, order:, cvv_response_message: nil)
+        create(:payment, order:, redirect_auth_url: nil)
       end
 
       it "does not find the payment" do

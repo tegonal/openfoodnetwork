@@ -68,6 +68,48 @@ RSpec.describe '
     expect(page).to have_checked_field "enterprise_visible_only_through_links"
   end
 
+  it "deleting an existing enterprise successfully" do
+    enterprise = create(:enterprise)
+
+    user = create(:user)
+
+    admin = login_as_admin
+
+    visit '/admin/enterprises'
+
+    expect do
+      accept_alert do
+        within "tr.enterprise-#{enterprise.id}" do
+          first("a", text: 'Delete').click
+        end
+      end
+
+      expect(page).to have_content("Successfully Removed")
+    end.to change{ Enterprise.count }.by(-1)
+  end
+
+  it "deleting an existing enterprise unsuccessfully" do
+    enterprise = create(:enterprise)
+    create(:order, distributor: enterprise)
+
+    user = create(:user)
+
+    admin = login_as_admin
+
+    visit '/admin/enterprises'
+
+    expect do
+      accept_alert do
+        within "tr.enterprise-#{enterprise.id}" do
+          first("a", text: 'Delete').click
+        end
+      end
+
+      expect(page).to have_content("Cannot delete record because dependent distributed order")
+      expect(page).to have_content(enterprise.name)
+    end.to change{ Enterprise.count }.by(0)
+  end
+
   it "editing an existing enterprise" do
     @enterprise = create(:enterprise)
     e2 = create(:enterprise)
@@ -733,18 +775,15 @@ RSpec.describe '
             it_behaves_like "edit link with", "openfoodnetwork.org", "http://openfoodnetwork.org"
           end
 
-          shared_examples "edit link with invalid" do |url|
-            it "url: #{url}" do
-              fill_in "enterprise_white_label_logo_link", with: url
+          context "with an invalid link" do
+            it "can not edit white label logo link" do
+              fill_in "enterprise_white_label_logo_link", with: "invalid url"
               click_button 'Update'
-              expect(page)
-                .to have_content "Link for the logo used in shopfront '#{url}' is an invalid URL"
+              expect(page).to have_content(
+                "Link for the logo used in shopfront 'invalid url' is an invalid URL"
+              )
               expect(distributor1.reload.white_label_logo_link).to be_nil
             end
-          end
-
-          context "can not edit white label logo link" do
-            it_behaves_like "edit link with invalid", "invalid url"
           end
         end
 

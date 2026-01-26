@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.describe Stripe::AuthorizeResponsePatcher do
   describe "#call!" do
     subject(:patcher) { Stripe::AuthorizeResponsePatcher.new(response) }
@@ -26,9 +24,9 @@ RSpec.describe Stripe::AuthorizeResponsePatcher do
         }
       }
 
-      it "patches response.cvv_result.message with the url in the response" do
+      it "patches response.cvv_result.redirect_auth_url with the url in the response" do
         new_response = patcher.call!
-        expect(new_response.cvv_result['message']).to eq "https://www.stripe.com/authorize"
+        expect(new_response.cvv_result['redirect_auth_url']).to eq "https://www.stripe.com/authorize"
       end
 
       context "with invalid url containing 'stripe.com'" do
@@ -42,9 +40,9 @@ RSpec.describe Stripe::AuthorizeResponsePatcher do
           }
         }
 
-        it "patches response.cvv_result.message with nil" do
+        it "patches response.cvv_result.redirect_auth_url with nil" do
           new_response = patcher.call!
-          expect(new_response.cvv_result['message']).to be_nil
+          expect(new_response.cvv_result['redirect_auth_url']).to eq nil
         end
       end
     end

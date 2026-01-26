@@ -115,27 +115,6 @@ cy:
         blank: "ni chaniateir ei adael yn wag"
         too_short: "rhy fyr (o leiaf %{count} cymeriad)"
   errors:
-    messages:
-      content_type_invalid: "math o gynnwys annilys"
-      file_size_out_of_range: "nid yw'r maint %{file_size} rhwng yr ystod ofynnol"
-      limit_out_of_range: "mae'r cyfanswm rhif tu hwnt i'r ystod"
-      image_metadata_missing: "nid yw'n llun dilys"
-      dimension_min_inclusion: "mae'n gorfod bod yn fwy neu'r un faint â %{width} x %{height} picsel."
-      dimension_max_inclusion: "mae'n gorfod bod yn llai neu'r un faint â %{width} x %{height} picsel."
-      dimension_width_inclusion: "nid yw lled yn cael ei gynnwys rhwng %{min} ac %{max} picsel."
-      dimension_height_inclusion: "nid yw uchder yn cael ei gynnwys rhwng %{min} acd %{max} picsel."
-      dimension_width_greater_than_or_equal_to: "mae'r lled yn gorfod bod yn fwy neu'r un faint â %{length} picsel."
-      dimension_height_greater_than_or_equal_to: "mae'r uchder yn gorfod bod yn fwy neu'r un faint â %{length} picsel."
-      dimension_width_less_than_or_equal_to: "mae'r lled yn gorfod bod yn llai neu'r un faint â %{length} picsel."
-      dimension_height_less_than_or_equal_to: "mae'r uchder yn gorfod bod yn llai neu'r un faint â %{length} picsel."
-      dimension_width_equal_to: "mae'r lled yn gorfod bod yr un faint â %{length} picsel."
-      dimension_height_equal_to: "mae'r uchder yn gorfod bod yr un faint â %{length} picsel."
-      aspect_ratio_not_square: "mae'n gorfod bod yn llun sgwâr"
-      aspect_ratio_not_portrait: "mae'n gorfod bod yn llun siâp portread"
-      aspect_ratio_not_landscape: "mae'n gorfod bod yn llun siâp tirlun"
-      aspect_ratio_is_not: "mae'n rhaid cael cymhareb agwedd o %{aspect_ratio}"
-      aspect_ratio_unknown: "yn meddu ar gymhareb agwedd anhysbys"
-      image_not_processable: "nid yw'n llun dilys"
     not_found:
       title: "Nid yw'r dudalen rydych yn chwilio amdani'n bodoli (404)"
       message_html: "<b>Rhowch gynnig arall</b> <p>. Hwyrach taw problem dros dro yw hon. Cliciwch y botwm ‘yn ôl’ i ddychwelyd at y sgrin flaenorol, neu ewch yn ôl i’r <a href='/'> Hafan </a>, a rhowch gynnig arall </p>. <b> Cysylltwch â’r ddesg</b> <p>Gymorth os bydd y broblem yn parhau neu os bydd yn fater brys, cofiwch ddweud wrthym amdano. Mae ein manylion cyswllt ar gael ar dudalen ‘Lleol’ <a href='https://openfoodnetwork.org/ofn-local/' target='blank'> y Rhwydwaith Bwyd Agored byd-eang </a>. </p> <p> Bydd o gymorth mawr inni os gallwch roi cymaint o fanylion â phosibl am y dudalen sydd ar goll.</p>"
@@ -548,6 +527,7 @@ cy:
     create_and_add_another: "Creu ac Ychwanegu Un arall"
     create: "Creu"
     cancel: "Canslo"
+    cancel_order: "Canslo"
     resume: "Ail-ddechrau"
     save: "Cadw"
     edit: "Golygu"
@@ -1345,10 +1325,11 @@ cy:
             no_rules_yet: Nid oes unrhyw reolau diofyn yn berthnasol eto
             add_new_button: '+ Ychwanegu Rheol Ddiofyn Newydd'
           no_tags_yet: Nid oes tagiau yn berthnasol i'r fenter hon eto
-          no_rules_yet: Nid oes unrhyw reolau yn berthnasol i'r tag hwn eto
-          for_customers_tagged: 'Ar gyfer cwsmeriaid a dagiwyd:'
-          add_new_rule: '+ Ychwanegu Rheol Newydd'
           add_new_tag: '+ Ychwanegu Tag Newydd'
+          show_hide_variants: 'Dangos neu Guddio amrywolion yn fy ffrynt siop'
+          show_hide_shipping: 'Dangos neu Guddio dulliau anfon wrth y ddesg dalu'
+          show_hide_payment: 'Dangos neu Guddio dulliau talu wrth y ddesg dalu'
+          show_hide_order_cycles: 'Dangos neu Guddio cylchoedd archebu yn fy ffrynt siop'
         users:
           legend: "Defnyddwyr"
           email_confirmation_notice_html: "Mae cadarnhad e-bost yn yr arfaeth. Anfonwyd cadarnhad e-bost at %{email}."
@@ -2399,10 +2380,8 @@ cy:
   email_confirmed: "Diolch am gadarnhau eich cyfeiriad e-bost."
   email_confirmation_activate_account: "Cyn y gallwn actifadu eich cyfrif newydd, mae angen i ni gadarnhau eich cyfeiriad e-bost."
   email_confirmation_greeting: "Helo, %{contact}!"
-  email_confirmation_profile_created: "Llwyddwyd i greu proffil ar gyfer %{name}! Er mwyn actifadu eich Proffil mae angen i ni gadarnhau'r cyfeiriad e-bost hwn."
   email_confirmation_click_link: "Cliciwch ar y ddolen isod i gadarnhau eich e-bost ac i barhau i sefydlu'ch proffil."
   email_confirmation_link_label: "Cadarnhau'r cyfeiriad e-bost hwn »"
-  email_confirmation_help_html: "Ar ôl cadarnhau eich e-bost gallwch gael mynediad i'ch cyfrif gweinyddol ar gyfer y fenter hon. Gweler  %{link} i ddarganfod mwy am nodweddion %{sitename} ac i ddechrau defnyddio'ch proffil neu'ch siop ar-lein."
   email_confirmation_notice_unexpected: "Rydych wedi derbyn y neges hon oherwydd i chi gofrestru ar %{sitename}, neu ar ôl cael eich gwahodd i gofrestru gan rywun rydych chi'n ei adnabod mae'n debyg. Os nad ydych yn deall pam eich bod yn derbyn yr e-bost hwn, ysgrifennwch at %{contact}."
   email_social: "Cysylltu â Ni:"
   email_contact: "Anfon ebost atom:"
@@ -3519,18 +3498,6 @@ cy:
           loading_variants: "Yn llwytho Amrywolion"
           no_variants: "Nid oes amrywiolyn ar gael ar gyfer y cynnyrch yma (cuddiwyd trwy osodiadau’r stocrestr )"
           some_variants_hidden: "(Hwyrach y cuddiwyd amrywiolion trwy osodiadau’r stocrestr)"
-      tag_rules:
-        shipping_method_tagged_top: "Tagiwyd dulliau anfon"
-        shipping_method_tagged_bottom: "yw:"
-        payment_method_tagged_top: "Tagiwyd dulliau talu "
-        payment_method_tagged_bottom: "yw:"
-        order_cycle_tagged_top: "Tagiwyd cylchoedd archebu "
-        order_cycle_tagged_bottom: "yw:"
-        inventory_tagged_top: "Tagiwyd amrywolion stocrestr"
-        inventory_tagged_bottom: "yw:"
-      new_tag_rule_dialog:
-        select_rule_type: "Dewis math o reol:"
-        add_rule: "Ychwanegu Rheol"
       enterprise_fees:
         inherit_from_product: "Etifeddu o'r Cynnyrch"
       orders:
@@ -3661,13 +3628,6 @@ cy:
       some_trouble: "Ges i ychydig o drafferth yn cadw: %{errors}"
       changing_on_hand_stock: Yn newid lefelau stoc sydd ar gael ...
       stock_reset: Ailosodwyd stoc i lefelau diofyn.
-    tag_rules:
-      show_hide_variants: 'Dangos neu Guddio amrywolion yn fy ffrynt siop'
-      show_hide_shipping: 'Dangos neu Guddio dulliau anfon wrth y ddesg dalu'
-      show_hide_payment: 'Dangos neu Guddio dulliau talu wrth y ddesg dalu'
-      show_hide_order_cycles: 'Dangos neu Guddio cylchoedd archebu yn fy ffrynt siop'
-      visible: GWELEDOL
-      not_visible: DDIM YN WELEDOL
     services:
       unsaved_changes_message: Mae newidiadau heb eu cadw yn bodoli ar hyn o bryd, hoffech eu cadw nawr neu eu hanwybyddu?
       save: CADW
@@ -4053,6 +4013,7 @@ cy:
     logourl: "url Logo"
     are_you_sure_delete: "Ydych chi'n siŵr eich bod chi am ddileu'r cofnod hwn?"
     confirm_delete: "Cadarnhau Dileu"
+    voucher: "Taleb"
     configurations: "Cyfluniadau"
     general_settings: "Gosodiadau Cyffredinol"
     site_name: "Enw'r Safle"
@@ -4585,6 +4546,7 @@ cy:
           terms_of_service: "Telerau Gwasanaeth"
         sortable_header:
           name: "Enw"
+          on_hand: "Ar gael"
           number: "Nifer"
           completed_at: "Cwblhawyd am"
           state: "Sir"
@@ -4776,13 +4738,10 @@ cy:
       webhook_endpoints:
         title: Webhook Endpoints
         description: Events in the system may trigger webhooks to external systems.
-        event_types:
-          order_cycle_opened: Order Cycle Opened
         event_type:
           header: Event type
         url:
           header: Endpoint URL
-          create_placeholder: Enter the URL of the remote webhook endpoint
       developer_settings:
         title: Gosodiadau'r Datblygwr
       form:
@@ -4936,6 +4895,31 @@ cy:
       previous: Blaenorol
     tag_list_input:
       default_placeholder: Ychwanegu tag
+    tag_rule_form:
+      tag_rules:
+        shipping_method_tagged_top: "Tagiwyd dulliau anfon"
+        shipping_method_tagged_bottom: "yw:"
+        payment_method_tagged_top: "Tagiwyd dulliau talu "
+        payment_method_tagged_bottom: "yw:"
+        order_cycle_tagged_top: "Tagiwyd cylchoedd archebu "
+        order_cycle_tagged_bottom: "yw:"
+        inventory_tagged_top: "Tagiwyd amrywolion stocrestr"
+        inventory_tagged_bottom: "yw:"
+        variant_tagged_bottom: "yw:"
+        visible: GWELEDOL
+        not_visible: DDIM YN WELEDOL
+    tag_rule_group_form:
+      for_customers_tagged: 'Ar gyfer cwsmeriaid a dagiwyd:'
+      add_new_rule: '+ Ychwanegu Rheol Newydd'
+      no_rules_yet: Nid oes unrhyw reolau yn berthnasol i'r tag hwn eto
+    add_tag_rule_modal:
+      select_rule_type: "Dewis math o reol:"
+      add_rule: "Ychwanegu Rheol"
+    webhook_endpoint_form:
+      url:
+        create_placeholder: Enter the URL of the remote webhook endpoint
+      event_types:
+        order_cycle_opened: Order Cycle Opened
   invisible_captcha:
     sentence_for_humans: "Gadewch yn wag os gwelwch yn dda."
     timestamp_error_message: "Rhowch gynnig arall ar ôl 5 eiliad."

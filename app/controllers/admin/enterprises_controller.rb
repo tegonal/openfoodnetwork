@@ -51,6 +51,7 @@ module Admin
 
       load_tag_rule_types
 
+      load_tag_rules
       return unless params[:stimulus]
 
       @enterprise.is_primary_producer = params[:is_primary_producer]
@@ -83,6 +84,8 @@ module Admin
           format.turbo_stream
         end
       else
+        load_tag_rule_types
+        load_tag_rules
         respond_with(@object) do |format|
           format.json {
             render json: { errors: @object.errors.messages }, status: :unprocessable_entity
@@ -144,6 +147,30 @@ module Admin
           render_as_json @collection, ams_prefix: params[:ams_prefix] || 'basic',
                                       spree_current_user:
         end
+      end
+    end
+
+    def new_tag_rule_group
+      load_tag_rule_types
+
+      @index = params[:index]
+      @customer_rule_index = params[:customer_rule_index].to_i
+      @group = { tags: [], rules: [] }
+
+      respond_to do |format|
+        format.turbo_stream
+      end
+    end
+
+    def destroy
+      if @object.destroy
+        flash.now[:success] = flash_message_for(@object, :successfully_removed)
+      else
+        flash.now[:error] = @object.errors.full_messages.to_sentence
+      end
+
+      respond_to do |format|
+        format.turbo_stream { render :destroy, status: :ok }
       end
     end
 
@@ -379,16 +406,32 @@ module Admin
     end
 
     def load_tag_rule_types
-      # Load rule types
       @tag_rule_types = [
-        { id: "FilterShippingMethods", name: t('js.tag_rules.show_hide_shipping') },
-        { id: "FilterPaymentMethods", name: t('js.tag_rules.show_hide_payment') },
-        { id: "FilterOrderCycles", name: t('js.tag_rules.show_hide_order_cycles') }
+        [t(".form.tag_rules.show_hide_shipping"), "FilterShippingMethods"],
+        [t(".form.tag_rules.show_hide_payment"), "FilterPaymentMethods"],
+        [t(".form.tag_rules.show_hide_order_cycles"), "FilterOrderCycles"]
       ]
 
-      return unless helpers.feature?(:inventory, @object)
+      if helpers.feature?(:variant_tag, @object)
+        @tag_rule_types.prepend([t(".form.tag_rules.show_hide_variants"), "FilterVariants"])
+      elsif helpers.feature?(:inventory, @object)
+        @tag_rule_types.prepend([t(".form.tag_rules.show_hide_variants"), "FilterProducts"])
+      end
+    end
 
-      @tag_rule_types.prepend({ id: "FilterProducts", name: t('js.tag_rules.show_hide_variants') })
+    def load_tag_rules
+      if helpers.feature?(:variant_tag, @object)
+        @default_rules = @enterprise.tag_rules.exclude_inventory.select(&:is_default)
+        @rules = @enterprise.tag_rules.exclude_inventory.prioritised.reject(&:is_default)
+      elsif helpers.feature?(:inventory, @object)
+        @default_rules = @enterprise.tag_rules.exclude_variant.select(&:is_default)
+        @rules = @enterprise.tag_rules.exclude_variant.prioritised.reject(&:is_default)
+      else
+        @default_rules =
+          @enterprise.tag_rules.exclude_inventory.exclude_variant.select(&:is_default)
+        @rules =
+          @enterprise.tag_rules.exclude_inventory.exclude_variant.prioritised.reject(&:is_default)
+      end
     end
 
     def setup_property

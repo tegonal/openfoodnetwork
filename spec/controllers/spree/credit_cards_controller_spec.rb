@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.describe Spree::CreditCardsController do
   describe "using VCR", :vcr, :stripe_version do
     let(:user) { create(:user) }
@@ -16,7 +14,7 @@ RSpec.describe Spree::CreditCardsController do
                                card: {
                                  number: '4242424242424242',
                                  exp_month: 9,
-                                 exp_year: 2024,
+                                 exp_year: 1.year.from_now.year,
                                  cvc: '314',
                                },
                              })

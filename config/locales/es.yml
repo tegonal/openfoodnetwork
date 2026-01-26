@@ -35,10 +35,10 @@ es:
         fee_type: Tipo de Comisión
       spree/order:
         payment_state: Estado del pago
-        shipment_state: Provincia de envío
+        shipment_state: Estado de envío
         completed_at: Completado en
         number: Número
-        state: Provincia
+        state: Estado
         email: E-mail del consumidor
       spree/payment:
         amount: Cantidad
@@ -115,27 +115,6 @@ es:
         blank: "no puede estar vacío"
         too_short: "es demasiado corto (el mínimo es %{count}caracteres)"
   errors:
-    messages:
-      content_type_invalid: "Tiene un tipo de contenido invalido"
-      file_size_out_of_range: "el tamaño %{file_size} no está en el rango requerido"
-      limit_out_of_range: "El número total está fuera de rango"
-      image_metadata_missing: "no es una imagen valida"
-      dimension_min_inclusion: "debe ser mayor o igual a %{width} x %{height} píxeles."
-      dimension_max_inclusion: "debe ser inferior o igual a %{width} x %{height} píxeles."
-      dimension_width_inclusion: "la anchura no se incluye entre %{min} y %{max} píxel."
-      dimension_height_inclusion: "la altura no se incluye entre %{min} y %{max} píxel."
-      dimension_width_greater_than_or_equal_to: "La anchura debe ser mayor o igual a %{length} píxeles."
-      dimension_height_greater_than_or_equal_to: "La altura debe ser mayor o igual que %{length} píxel."
-      dimension_width_less_than_or_equal_to: "La anchura debe ser menor o igual a %{length} píxeles."
-      dimension_height_less_than_or_equal_to: "La altura debe ser menor o igual a %{length} píxel."
-      dimension_width_equal_to: "La anchura debe ser igual a %{length} píxeles."
-      dimension_height_equal_to: "la altura debe ser igual a %{length} pixel."
-      aspect_ratio_not_square: "la imagen tiene que ser cuadrada"
-      aspect_ratio_not_portrait: "la imagen tiene que ser un retrato"
-      aspect_ratio_not_landscape: "debe ser una imagen de paisaje"
-      aspect_ratio_is_not: "debe tener una relación de aspecto de %{aspect_ratio}"
-      aspect_ratio_unknown: "tiene una relación de aspecto desconocida"
-      image_not_processable: "no es una imagen valida"
     not_found:
       title: "La página que estas buscando no existe (404)"
       message_html: "<b>Por favor, inténtelo de nuevo</b> <p>Esto puede ser un problema temporal. Haga clic en el botón Atrás para volver a la pantalla anterior o vuelva a <a href='/'>Inicio</a> e inténtelo de nuevo</p>. <b>Póngase en contacto con el servicio de asistencia</b> <p>Si el problema persiste o es urgente, comuníquenoslo. Encuentre nuestros datos de contacto en la <a href='https://openfoodnetwork.org/ofn-local/' target='blank'>página local de Open Food Network</a>. </p><p>Nos será de gran ayuda que nos facilite todos los detalles posibles sobre el motivo de la página que falta.</p>"
@@ -390,7 +369,7 @@ es:
       instructions: "Tu pedido ha sido enviado"
       shipment_summary: "Resumen de envío"
       subject: "Notificación de envío"
-      thanks: "Gracias por hacer negocios."
+      thanks: "Gracias por ayudar a tus productoras locales"
       track_information: "Información de seguimiento: %{tracking}"
       track_link: "Enlace de seguimiento: %{url}"
   subscription_mailer:
@@ -550,6 +529,7 @@ es:
     create_and_add_another: "Crear y agregar otro"
     create: "Crear"
     cancel: "Cancelar"
+    cancel_order: "Cancelar"
     resume: "Continuar"
     save: "Guardar"
     edit: "Editar"
@@ -906,7 +886,7 @@ es:
           products_total_html:
             one: "<strong>%{count}producto</strong> encontrado para tus criterios de búsqueda. Mostrando %{from} de %{to}"
             many: "<strong> %{count}productos </strong>encontrados para tus criterios de búsqueda. Mostrando %{from} de %{to}"
-            other: "<strong>%{count}productos</strong> encontrados para tus criterios de búsqueda. Mostrando %{from} de %{to}"
+            other: "<strong>%{count} productos</strong> encontrados para tus criterios de búsqueda. Mostrando %{from} de %{to}"
           per_page:
             show: Mostrar
             per_page: "%{num} por página"
@@ -1341,10 +1321,11 @@ es:
             no_rules_yet: No hay reglas por defecto aplicadas
             add_new_button: '+ Añadir una nueva regla por defecto'
           no_tags_yet: No hay etiquetas para esta organización
-          no_rules_yet: Todavía no se aplican reglas a esta etiqueta
-          for_customers_tagged: 'Para los consumidores etiquetados:'
-          add_new_rule: '+ Añadir una nueva regla'
           add_new_tag: '+ Añadir una nueva etiqueta'
+          show_hide_variants: 'Mostrar u ocultar variantes en mi tienda'
+          show_hide_shipping: 'Mostrar u ocultar los métodos de envío al comprar'
+          show_hide_payment: 'Mostrar u ocultar los métodos de pago al comprar'
+          show_hide_order_cycles: 'Mostrar u ocultar ciclos de pedido en mi tienda'
         users:
           legend: "Usuarias"
           email_confirmation_notice_html: "Falta la confirmación del email. Te hemos enviado un correo de confirmación a %{email}."
@@ -1485,15 +1466,17 @@ es:
         success: 'Los correos electrónicos que se enviarán a las productoras se han puesto en cola para enviarlos.'
       edit:
         save: "Guardar"
-        save_and_next: "Salvar y continuar"
+        save_and_next: "Guardar y continuar"
         next: "Siguiente"
         cancel: "Cancelar"
         back_to_list: "Regresar a la lista"
-        save_and_back_to_list: "Salvar y volver a lista"
+        save_and_back_to_list: "Guardar y volver a lista"
         choose_products_from: "Escoger Productos desde:"
         re_notify_producers: Re notificar a los productores
         notify_producers_tip: Esto le enviará un correo a cada productor con su lista de pedidos.
       date_time_warning_modal_content:
+        title: 'Hay pedidos ya asociados a este ciclo de pedido'
+        content: 'Si quieres crear un nuevo ciclo de pedido, se recomienda duplicarlo primero y luego cambiar las fechas'
         proceed: 'Proceda de todos modos'
         cancel: 'Cancelar'
       incoming:
@@ -1503,7 +1486,7 @@ es:
         receival_details: "Detalles de la recepción"
         fees: "Comisiones"
         save: "Guardar"
-        save_and_next: "Salvar y continuar"
+        save_and_next: "Guardar y continuar"
         next: "Siguiente"
         cancel: "Cancelar"
         back_to_list: "Regresar a la lista"
@@ -1517,7 +1500,7 @@ es:
         next: "Siguiente"
         previous: "Anterior"
         save: "Guardar"
-        save_and_next: "Salvar y continuar"
+        save_and_next: "Guardar y continuar"
         cancel: "Cancelar"
         back_to_list: "Regresar a la lista"
       checkout_options:
@@ -1527,7 +1510,7 @@ es:
         distributor: "Distribuidora"
         payment_methods: "Métodos de Pago"
         save: "Guardar"
-        save_and_back_to_list: "Salvar y volver a lista"
+        save_and_back_to_list: "Guardar y volver a lista"
         select_all: "Seleccionar todo"
         shipping_methods: "Métodos de envío"
       wizard_progress:
@@ -1946,7 +1929,7 @@ es:
           label: País
       shipping_info:
         title: Información de envío
-      submit: Siguente - método de pago
+      submit: Siguiente - método de pago
       cancel: Regresar a Editar cesta
     step2:
       payment_method:
@@ -2302,10 +2285,8 @@ es:
   email_confirmed: "Gracias por confirmar la dirección de correo electrónico."
   email_confirmation_activate_account: "Antes de que podamos activar su nueva cuenta, necesitamos confirmar su dirección de correo electrónico."
   email_confirmation_greeting: "Hola, %{contact}!"
-  email_confirmation_profile_created: "¡Se creó un un perfil para %{name} con éxito! Para activar su Perfil necesitamos que confirme esta dirección de correos."
   email_confirmation_click_link: "Por favor haga clic en el enlace de abajo para confirmar el correo electrónico y continuar configurando su perfil."
   email_confirmation_link_label: "Confirmar este correo electrónico »"
-  email_confirmation_help_html: "Después de confirmar el correo electrónico puedes acceder a tu cuenta de administración para esta organización. Visita %{link} para encontrar más información sobre las características de %{sitename} y empieza a usar tu perfil o tienda online."
   email_confirmation_notice_unexpected: "Recibes este mensaje porque te has registrado en %{sitename} o has sido invitado a inscribirte por alguien que probablemente conozcas. Si no entiendes por qué estás recibiendo este correo electrónico, escribe a %{contact}."
   email_social: "Conecte con nosotros:"
   email_contact: "Envíenos un correo electrónico:"
@@ -2855,7 +2836,7 @@ es:
   tags: "Etiquetas"
   calculator: "Calculadora"
   calculator_values: "Calculadora de valores"
-  calculator_settings_warning: "Si está cambiando el tipo de calculadora, debe de salvar primero antes de editar las configuraciones de la calculadora"
+  calculator_settings_warning: "Si está cambiando el tipo de calculadora, debe de guardar primero antes de editar las configuraciones de la calculadora"
   calculator_preferred_unit_error: "debe ser kg o lb"
   calculator_preferred_value_error: "Entrada inválida. Utilice solo números. Por ejemplo: 10, 5.5, -20"
   flat_percent_per_item: "Porcentaje fijo (por artículo)"
@@ -3196,6 +3177,7 @@ es:
   product_importer_products_save_error: No se guardó ningún producto con éxito
   product_import_file_not_found_notice: 'Archivo no encontrado o no se pudo abrir'
   product_import_no_data_in_spreadsheet_notice: 'No se encontraron datos en la hoja de cálculo'
+  product_import_inventory_disable: La importación a inventarios no está disponible.
   order_choosing_hub_notice: Tu Grupo se ha seleccionado.
   order_cycle_selecting_notice: Se ha seleccionado el ciclo de pedido.
   adjustments_tax_rate_error: "^Comprueba que los impuestos para este ajuste es correcta."
@@ -3397,18 +3379,6 @@ es:
           select_all_variants: "Seleccionar todo"
           variants_loaded: "%{num_of_variants_loaded} de %{total_number_of_variants} variantes cargadas"
           loading_variants: "Cargando variantes"
-      tag_rules:
-        shipping_method_tagged_top: "Métodos de envío etiquetados"
-        shipping_method_tagged_bottom: "son:"
-        payment_method_tagged_top: "Métodos de pago etiquetados"
-        payment_method_tagged_bottom: "son:"
-        order_cycle_tagged_top: "Ciclos de pedido etiquetados"
-        order_cycle_tagged_bottom: "son:"
-        inventory_tagged_top: "Variantes de inventario etiquetadas"
-        inventory_tagged_bottom: "son:"
-      new_tag_rule_dialog:
-        select_rule_type: "Selecciona un tipo de regla:"
-        add_rule: "Añadir regla"
       enterprise_fees:
         inherit_from_product: "Heredar del producto"
       orders:
@@ -3483,7 +3453,7 @@ es:
           customer_placeholder: "customer@example.org"
           valid_email_error: "Introduce un email válido"
       subscriptions:
-        error_saving: "Error al salvar suscripción "
+        error_saving: "Error al guardar suscripción "
         new:
           please_select_a_shop: "Por favor seleccione una tienda"
       enterprises:
@@ -3531,13 +3501,6 @@ es:
       some_trouble: "Han habido algunos problemas al guardar: %{errors}"
       changing_on_hand_stock: Cambiando los niveles de stock...
       stock_reset: Reset Stock a valores por defecto
-    tag_rules:
-      show_hide_variants: 'Mostrar u ocultar variantes en mi tienda'
-      show_hide_shipping: 'Mostrar u ocultar los métodos de envío al comprar'
-      show_hide_payment: 'Mostrar u ocultar los métodos de pago al comprar'
-      show_hide_order_cycles: 'Mostrar u ocultar ciclos de pedido en mi tienda'
-      visible: VISIBLE
-      not_visible: NO VISIBLE
     services:
       unsaved_changes_message: Los cambios no guardados existen todavía, ¿guardar ahora o ignorar?
       save: GUARDAR
@@ -3908,6 +3871,7 @@ es:
     logourl: "URL del logo"
     are_you_sure_delete: "¿Está seguro de que desea eliminar este registro?"
     confirm_delete: "Confirmar la eliminación"
+    voucher: "Bono"
     configurations: "Configuraciones"
     general_settings: "Configuración general"
     site_name: "Nombre del sitio"
@@ -4431,6 +4395,7 @@ es:
           terms_of_service: "Términos de servicio"
         sortable_header:
           name: "Nombre"
+          on_hand: "Disponibles"
           number: "Número"
           completed_at: "Completado en"
           state: "Provincia"
@@ -4562,9 +4527,10 @@ es:
         instructions: "Su pedido de %{distributor} ha sido enviado"
         shipment_summary: "Resumen de envío"
         subject: "Notificación de envío"
-        thanks: "Gracias por hacer negocios."
+        thanks: "Gracias por ayudar a tus productoras locales"
         track_information: "Información de seguimiento: %{tracking}"
         track_link: "Enlace de seguimiento: %{url}"
+        picked_up_instructions: "Tu pedido de %{distributor} ha sido entregado"
         picked_up_subject: "Notificación de recogida"
     test_mailer:
       test_email:
@@ -4616,8 +4582,6 @@ es:
         title: API key
       webhook_endpoints:
         description: Los eventos del sistema pueden desencadenar webhooks a sistemas externos.
-        event_types:
-          order_cycle_opened: Ciclo de pedidos abierto
       developer_settings:
         title: Configuración de desarrollo
       form:
@@ -4756,6 +4720,29 @@ es:
       previous: Anterior
     tag_list_input:
       default_placeholder: Añadir una etiqueta
+    tag_rule_form:
+      tag_rules:
+        shipping_method_tagged_top: "Métodos de envío etiquetados"
+        shipping_method_tagged_bottom: "son:"
+        payment_method_tagged_top: "Métodos de pago etiquetados"
+        payment_method_tagged_bottom: "son:"
+        order_cycle_tagged_top: "Ciclos de pedido etiquetados"
+        order_cycle_tagged_bottom: "son:"
+        inventory_tagged_top: "Variantes de inventario etiquetadas"
+        inventory_tagged_bottom: "son:"
+        variant_tagged_bottom: "son:"
+        visible: VISIBLE
+        not_visible: NO VISIBLE
+    tag_rule_group_form:
+      for_customers_tagged: 'Para los consumidores etiquetados:'
+      add_new_rule: '+ Añadir una nueva regla'
+      no_rules_yet: Todavía no se aplican reglas a esta etiqueta
+    add_tag_rule_modal:
+      select_rule_type: "Selecciona un tipo de regla:"
+      add_rule: "Añadir regla"
+    webhook_endpoint_form:
+      event_types:
+        order_cycle_opened: Ciclo de pedidos abierto
   invisible_captcha:
     sentence_for_humans: "Por favor, dejalo vacio"
     timestamp_error_message: "Por favor, inténtelo de nuevo después de 5 segundos."

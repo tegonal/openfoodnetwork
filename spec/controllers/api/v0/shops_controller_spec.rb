@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.describe Api::V0::ShopsController do
   include AuthenticationHelper
+
   render_views
 
   context "as a non-authenticated user" do

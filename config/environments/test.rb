@@ -66,21 +66,15 @@ Rails.application.configure do
   # Tell Active Support which deprecation messages to disallow.
   config.active_support.disallowed_deprecation_warnings = []
 
+  # Reduced logging by default; set the desired level in .env.test.local file.
+  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", :fatal)
+
   # Fail tests on deprecated code unless it's a known case to solve.
   Rails.application.deprecators.behavior = ->(message, callstack, deprecator) do
     allowed_warnings = [
       # List strings here to allow matching deprecations.
       #
-      # https://guides.rubyonrails.org/upgrading_ruby_on_rails.html#new-activesupport-cache-serialization-format
-      "config.active_support.cache_format_version",
-
-      # `Rails.application.secrets` is deprecated in favor of `Rails.application.credentials` and will be removed in Rails 7.2
-      "Rails.application.secrets",
-
       "Passing the class as positional argument",
-
-      # Spree::Order model aliases `bill_address`, but `bill_address` is not an attribute. Starting in Rails 7.2, alias_attribute with non-attribute targets will raise. Use `alias_method :billing_address, :bill_address` or define the method manually. (called from initialize at app/models/spree/order.rb:188)
-      "alias_attribute with non-attribute targets will raise",
 
       # Spree::CreditCard model aliases `cc_type` and has a method called `cc_type=` defined. Starting in Rails 7.2 `brand=` will not be calling `cc_type=` anymore. You may want to additionally define `brand=` to preserve the current behavior.
       "model aliases",

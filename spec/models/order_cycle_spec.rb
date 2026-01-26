@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.describe OrderCycle do
   it "should be valid when built from factory" do
     expect(build(:simple_order_cycle)).to be_valid
@@ -804,10 +802,10 @@ RSpec.describe OrderCycle do
           ).distributor_shipping_methods.first
           oc.selected_distributor_shipping_methods << other_distributor_shipping_method_i
 
-          expect(oc.distributor_shipping_methods).to eq [
+          expect(oc.distributor_shipping_methods).to contain_exactly(
             distributor_shipping_method,
             other_distributor_shipping_method_i
-          ]
+          )
         end
       end
     end

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 RSpec.describe Reporting::Reports::OrdersAndFulfillment::OrderCycleCustomerTotals do
   let!(:distributor) { create(:distributor_enterprise, name: "Apple Market") }
   let!(:customer) { create(:customer, enterprise: distributor, user:, code: "JHN") }
@@ -76,6 +74,23 @@ RSpec.describe Reporting::Reports::OrdersAndFulfillment::OrderCycleCustomerTotal
       it 'includes the shipment state' do
         expect(report.rows.first.shipment_state).to eq order.shipment_state
       end
+    end
+
+    describe "final weight volume column" do
+      # related to https://github.com/openfoodfoundation/openfoodnetwork/issues/13270
+      # not sure how we got DEPRECATION WARNING: Rails 7.0 has deprecated Enumerable.sum
+      # but these scenarios might be related
+      shared_examples "the report is successfully generated" do |test_case, type|
+        it "if column final_weight_volume is #{test_case}" do
+          order.line_items[0].update!(final_weight_volume: type)
+          expect(report_table.length).to eq(2)
+        end
+      end
+
+      it_behaves_like "the report is successfully generated", "nil", nil
+      it_behaves_like "the report is successfully generated", "an empty value", ""
+      it_behaves_like "the report is successfully generated", "a white space", " "
+      it_behaves_like "the report is successfully generated", "a string", "kilograms"
     end
   end
 

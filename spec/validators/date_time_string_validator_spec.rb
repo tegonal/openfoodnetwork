@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 RSpec.describe DateTimeStringValidator do
   describe "internationalization" do
     it "has translation for NOT_STRING_ERROR" do
@@ -17,6 +15,7 @@ RSpec.describe DateTimeStringValidator do
     let(:instance) do
       Class.new do
         include ActiveModel::Validations
+
         attr_accessor :timestamp
 
         validates :timestamp, date_time_string: true

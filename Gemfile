@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source 'https://gem.coop'
 git_source(:github) { |repo_name| "https://github.com/#{repo_name}.git" }
 
 ruby File.read('.ruby-version').chomp
@@ -14,16 +14,19 @@ gem "active_storage_validations"
 gem "aws-sdk-s3", require: false
 gem "image_processing"
 
-gem 'activemerchant', '>= 1.78.0'
-gem 'angular-rails-templates', '>= 0.3.0'
+gem 'activemerchant'
+gem 'angular-rails-templates'
 gem 'ransack', '~> 4.1.0'
 gem 'responders'
-gem 'webpacker', '~> 5'
+gem 'shakapacker', '7.2.3'
+
+# Indirect dependency but we access it directly in JS specs.
+# It turns out to be hard to upgrade but please do if you can.
+gem 'sprockets', '~> 3.7'
 
 gem 'i18n'
 gem 'i18n-js', '~> 3.9.0'
 gem 'rails-i18n'
-gem 'rails_safe_tasks', '~> 1.0'
 
 gem "activerecord-import"
 gem "db2fog", github: "openfoodfoundation/db2fog", branch: "rails-7"
@@ -40,13 +43,13 @@ gem 'web', path: './engines/web'
 
 gem "activerecord-postgresql-adapter"
 gem "arel-helpers", "~> 2.12"
-gem "pg", "~> 1.2.3"
+gem "pg"
 
 gem 'acts_as_list', '1.0.4'
 gem 'cancancan', '~> 1.15.0'
 gem 'digest'
 gem 'ffaker'
-gem 'highline', '2.0.3' # Necessary for the install generator
+gem 'highline'
 gem 'json'
 gem 'monetize', '~> 1.11'
 gem 'paranoia', '~> 2.4'
@@ -54,7 +57,7 @@ gem 'state_machines-activerecord'
 gem 'stringex', '~> 2.8.5', require: false
 
 gem 'paypal-sdk-merchant', '1.117.2'
-gem 'stripe'
+gem 'stripe', '~> 15'
 
 gem 'devise'
 gem 'devise-encryptable'
@@ -123,6 +126,8 @@ gem 'angular_rails_csrf'
 
 gem 'jquery-rails', '4.4.0'
 gem 'jquery-ui-rails', '~> 4.2'
+# TODO move away from sass-rails, master branch will get rid of dependency, so we can move to
+# https://github.com/sass/embedded-host-node
 gem "select2-rails", github: "openfoodfoundation/select2-rails", branch: "v349_with_thor_v1"
 
 gem 'good_migrations'
@@ -182,16 +187,19 @@ group :test do
 end
 
 group :development do
-  gem 'debugger-linecache'
   gem 'foreman'
+  gem 'haml_lint', require: false
   gem 'i18n-tasks'
   gem 'listen'
-  gem 'pry', '~> 0.13.0'
+  gem 'pry'
   gem 'query_count'
   gem 'rails-erd'
   gem 'rubocop'
+  gem 'rubocop-capybara'
+  gem 'rubocop-factory_bot'
   gem 'rubocop-rails'
   gem 'rubocop-rspec'
+  gem 'rubocop-rspec_rails'
   gem 'spring'
   gem 'spring-commands-rspec'
   gem 'spring-commands-rubocop'

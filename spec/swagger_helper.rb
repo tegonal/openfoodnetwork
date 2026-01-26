@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.configure do |config|
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include OpenFoodNetwork::ApiHelper, type: :request
@@ -79,6 +77,12 @@ RSpec.configure do |config|
     example.metadata[:operation][:tags] ||= [self.class.top_level_description]
 
     next if response&.body.blank?
+
+    # Replace random values from generated strings for a deterministic documentation.
+    response.body.gsub!(
+      %r{/rails/active_storage/[0-9A-Za-z/=-]*/([^/.]+).png},
+      '/rails/active_storage/url/\1.png',
+    )
 
     # Include response as example in the documentation.
     example.metadata[:response][:content] ||= {}

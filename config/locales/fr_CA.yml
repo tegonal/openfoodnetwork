@@ -115,27 +115,6 @@ fr_CA:
         blank: "Champ obligatoire"
         too_short: "est trop court (minimum %{count} caractère)"
   errors:
-    messages:
-      content_type_invalid: "a un contenu invalide"
-      file_size_out_of_range: "la taille %{file_size} n'est pas dans la fourchette requise"
-      limit_out_of_range: "le nombre total est hors de la fourchette"
-      image_metadata_missing: "n'est pas une image valide"
-      dimension_min_inclusion: "doit être plus grand ou égal à %{width} x %{height} pixel."
-      dimension_max_inclusion: "doit être plus grand ou égal à %{width} x %{height} pixel."
-      dimension_width_inclusion: "la largeur n'est pas comprise entre %{min} et %{max} pixel."
-      dimension_height_inclusion: "la hauteur n'est pas comprise entre %{min} et %{max} pixel."
-      dimension_width_greater_than_or_equal_to: "la largeur doit être supérieure ou égale à %{length} pixel."
-      dimension_height_greater_than_or_equal_to: "la hauteur doit être supérieure ou égale à %{length} pixel."
-      dimension_width_less_than_or_equal_to: "la largeur doit être inférieure ou égale à %{length} pixel."
-      dimension_height_less_than_or_equal_to: "la hauteur doit être inférieure ou égale à %{length} pixel."
-      dimension_width_equal_to: "la largeur doit être égale à %{length} pixel."
-      dimension_height_equal_to: "la hauteur doit être égale à %{length} pixel. "
-      aspect_ratio_not_square: "doit être une image carrée"
-      aspect_ratio_not_portrait: "doit être une image en mode portrait"
-      aspect_ratio_not_landscape: "doit être une image en mode paysage"
-      aspect_ratio_is_not: "doit avoir un rapport d'aspect de %{aspect_ratio}"
-      aspect_ratio_unknown: "a un rapport d'aspect inconnu"
-      image_not_processable: "n'est pas une image valide"
     not_found:
       title: "La page que vous recherchez n'existe pas (erreur 404)"
       message_html: "<b>Veuillez essayer à nouveau </b> <p> Il s'agit peut-être d'un problème temporaire. Veuillez cliquer sur le bouton retour de votre navigateur ou retourner à l'<a href='/'> Accueil </a> et recommencez. <b> Contacter notre support  </b> <p> Si le problème persiste ou si c'est urgent, veuillez nous contacter. </p>"
@@ -550,6 +529,7 @@ fr_CA:
     create_and_add_another: "Créer et ajouter nouveau"
     create: "Créer"
     cancel: "Annuler"
+    cancel_order: "Annuler"
     resume: "Reprendre"
     save: "Enregistrer"
     edit: "Modifier"
@@ -955,6 +935,11 @@ fr_CA:
       clone:
         success: Le produit a bien été dupliqué
         error: Impossible de dupliquer le produit
+      tag_rules:
+        rules_per_tag:
+          one: "%{tag} a 1 règle"
+          many: "%{tag} a  %{count} des règles"
+          other: "%{tag} a %{count} des règles"
     product_import:
       title: import produit
       file_not_found: Fichier non trouvé ou impossible à ouvrir
@@ -1350,10 +1335,11 @@ fr_CA:
             no_rules_yet: Aucune règle par défaut
             add_new_button: '+ Ajouter une règle par défaut'
           no_tags_yet: Aucun tag défini par cette entreprise pour le moment
-          no_rules_yet: Aucune règle ne concerne ce tag pour le moment
-          for_customers_tagged: 'Pour les acheteurs avec le tag:'
-          add_new_rule: '+ Ajouter une nouvelle règle'
           add_new_tag: '+ Ajouter un nouveau tag'
+          show_hide_variants: 'Afficher ou Masquer les variantes dans ma boutique'
+          show_hide_shipping: 'Afficher ou Montrer les méthodes de livraison lors de la finalisation de commande'
+          show_hide_payment: 'Afficher ou Montrer les méthodes de paiement lors de la finalisation de commande'
+          show_hide_order_cycles: 'Afficher ou Masquer les cycles de vente de ma boutique'
         users:
           legend: "Utilisateurs"
           email_confirmation_notice_html: "L'email de confirmation n'a pas encore été validé. Il a été envoyé à %{email}."
@@ -1452,7 +1438,10 @@ fr_CA:
         owner: Gérant
         producer: Producteur
         sells_options:
+          unspecified: non spécifié
           none: aucun
+          own: propre
+          any: Tous
       change_type_form:
         producer_profile: Profil producteur
         connect_ofn: Gagnez en visibilité via OFN
@@ -1503,6 +1492,10 @@ fr_CA:
       invite_manager:
         user_already_exists: "Le compte existe déjà"
         error: "Un problème est survenu"
+    tag_rules:
+      not_supported_type: Type de règle de balise non pris en charge
+      confirm_delete: Êtes-vous sûr de vouloir supprimer cette règle ?
+      destroy_error: Un problème s'est produit lors de la suppression de la règle de balise.
     order_cycles:
       loading_flash:
         loading_order_cycles: Cycles de vente en cours de chargement
@@ -1726,6 +1719,8 @@ fr_CA:
       not_visible: "%{enterprise} n'est pas visible et ne peut être trouvé sur la carte ou dans les recherches sur le site."
     reports:
       none: aucun
+      metadata:
+        report_title: Titre du rapport
       deprecated: "Ce rapport est obsolète et ne sera bientôt plus disponible (sera supprimé dans une prochaine mise à jour)."
       hidden_field: "< Masqué >"
       unitsize: Unité de mesure
@@ -1829,6 +1824,7 @@ fr_CA:
         display: Afficher
         summary_row: Ligne TOTAL
         header_row: Ligne titre
+        metadata_rows: Lignes de métadonnée
         raw_data: Données brutes
         formatted_data: Données formatées
       packing:
@@ -2405,10 +2401,16 @@ fr_CA:
   email_confirmed: "Veuillez confirmer votre adresse email."
   email_confirmation_activate_account: "Avant de pouvoir activer votre compte, nous devons nous assurer de la validité de votre adresse email."
   email_confirmation_greeting: "Bonjour %{contact}!"
-  email_confirmation_profile_created: "Le profil pour %{name} a été créé avec succès! Pour activer votre Profil nous devons vérifier cette adresse email."
+  email_confirmation_profile_created: >
+      Un profil pour %{name}a été créé avec succès ! Pour activer votre profil, nous
+      devons confirmer cette adresse e-mail.
   email_confirmation_click_link: "Veuillez cliquer sur le lien ci-dessous pour confirmer votre email et continuer la configuration de votre compte."
   email_confirmation_link_label: "Confirmer cette adresse email »"
-  email_confirmation_help_html: "Après confirmation de votre email, vous pourrez accéder au compte d'administration de cette entreprise. Voir %{link} pour en savoir plus à propos de %{sitename} et commencer à utiliser votre profil et/ou boutique en ligne."
+  email_confirmation_help_html: >
+      Après avoir confirmé votre adresse e-mail, vous pouvez accéder à votre compte
+      d'administration pour cette entreprise.  Voir le  %{link} pour en savoir plus
+      sur %{sitename}'s fonctionnalités et commencer à utiliser votre profil ou votre
+      boutique en ligne."
   email_confirmation_notice_unexpected: "Vous recevez ce message car vous vous êtes inscrit sur %{sitename}, ou avez été invité à vous inscrire par l'un de vos contacts. Si vous ne comprenez pas pourquoi vous recevez ce message, écrivez à %{contact}."
   email_social: "Nous suivre:"
   email_contact: "Nous écrire:"
@@ -3349,6 +3351,7 @@ fr_CA:
   order_cycles_no_permission_to_coordinate_error: "Aucune de vos entreprises n'a les droits requis pour coordonner un cycle de vente"
   order_cycles_no_permission_to_create_error: "Vous n'avez pas les droits requis pour créer un cycle de vente coordonné par cette entreprise"
   order_cycle_closed: "Le cycle de vente que vous avez sélectionné a fermé. "
+  order_cycle_closed_next_steps: "Le cycle de commande que vous avez sélectionné\nvient de se terminer. Veuillez nous contacter pour finaliser votre commande #%{order_number}!"
   back_to_orders_list: "Retour à la liste des commandes"
   no_orders_found: "Aucune commande trouvée"
   order_information: "Info commande"
@@ -3536,18 +3539,6 @@ fr_CA:
           loading_variants: "Chargement des variantes"
           no_variants: "Pas de variante disponible pour ce produit (caché via les paramètres du catalogue boutique). "
           some_variants_hidden: "(Certaines variantes sont susceptibles d'être cachées via les paramètres du catalogue boutique)"
-      tag_rules:
-        shipping_method_tagged_top: "Les méthodes de livraison taggées"
-        shipping_method_tagged_bottom: "sont:"
-        payment_method_tagged_top: "Les méthodes de payments taguées"
-        payment_method_tagged_bottom: "sont:"
-        order_cycle_tagged_top: "Les cycles de vente taggés"
-        order_cycle_tagged_bottom: "sont:"
-        inventory_tagged_top: "Les variantes du catalogue boutique taggées"
-        inventory_tagged_bottom: "sont:"
-      new_tag_rule_dialog:
-        select_rule_type: "Choisir le type de règle:"
-        add_rule: "Ajouter une règle"
       enterprise_fees:
         inherit_from_product: "Hériter du produit"
       orders:
@@ -3678,13 +3669,6 @@ fr_CA:
       some_trouble: "Nous n'avons pas pu sauvegarder : %{errors}"
       changing_on_hand_stock: Modification des niveaux de stock en cours...
       stock_reset: Les niveaux de stock ont été réinitiatlisés (valeurs par défaut)
-    tag_rules:
-      show_hide_variants: 'Afficher ou Masquer les variantes dans ma boutique'
-      show_hide_shipping: 'Afficher ou Montrer les méthodes de livraison lors de la finalisation de commande'
-      show_hide_payment: 'Afficher ou Montrer les méthodes de paiement lors de la finalisation de commande'
-      show_hide_order_cycles: 'Afficher ou Masquer les cycles de vente de ma boutique'
-      visible: VISIBLE
-      not_visible: INVISIBLE
     services:
       unsaved_changes_message: Des modifications n'ont pas encore été sauvegardées, sauvegarder maintenant ou ignorer ?
       save: SAUVEGARDER
@@ -4086,6 +4070,7 @@ fr_CA:
     logourl: "URL du logo"
     are_you_sure_delete: "Etes-vous certain de vouloir supprimer cet élément ?"
     confirm_delete: "Confirmer la suppression"
+    voucher: "Bon de réduction"
     configurations: "Configurations"
     general_settings: "Configurations générales"
     site_name: "Nom du site"
@@ -4619,6 +4604,7 @@ fr_CA:
           terms_of_service: "Conditions Générales d'Utilisation"
         sortable_header:
           name: "Nom"
+          on_hand: "En stock"
           number: "N° commande"
           completed_at: "Passée à "
           state: "Département"
@@ -4811,13 +4797,10 @@ fr_CA:
       webhook_endpoints:
         title: 'Webhook '
         description: Les événements dans le système peuvent déclencher des webhooks vers des systèmes externes.
-        event_types:
-          order_cycle_opened: Cycle de vente ouvert
         event_type:
           header: Type d'évènement
         url:
           header: URL du point de terminaison
-          create_placeholder: Entrez l'URL du point de terminaison du webhook
       developer_settings:
         title: Paramètres développeurs
       form:
@@ -4958,6 +4941,32 @@ fr_CA:
       previous: Précédent
     tag_list_input:
       default_placeholder: Ajouter un tag
+    tag_rule_form:
+      tag_rules:
+        shipping_method_tagged_top: "Les méthodes de livraison taggées"
+        shipping_method_tagged_bottom: "sont:"
+        payment_method_tagged_top: "Les méthodes de payments taguées"
+        payment_method_tagged_bottom: "sont:"
+        order_cycle_tagged_top: "Les cycles de vente taggés"
+        order_cycle_tagged_bottom: "sont:"
+        inventory_tagged_top: "Les variantes du catalogue boutique taggées"
+        inventory_tagged_bottom: "sont:"
+        variant_tagged_top: "Variantes marquées"
+        variant_tagged_bottom: "sont:"
+        visible: VISIBLE
+        not_visible: INVISIBLE
+    tag_rule_group_form:
+      for_customers_tagged: 'Pour les acheteurs avec le tag:'
+      add_new_rule: '+ Ajouter une nouvelle règle'
+      no_rules_yet: Aucune règle ne concerne ce tag pour le moment
+    add_tag_rule_modal:
+      select_rule_type: "Choisir le type de règle:"
+      add_rule: "Ajouter une règle"
+    webhook_endpoint_form:
+      url:
+        create_placeholder: Entrez l'URL du point de terminaison du webhook
+      event_types:
+        order_cycle_opened: Cycle de vente ouvert
   invisible_captcha:
     sentence_for_humans: "Merci de laisser ce champ libre"
     timestamp_error_message: "S'il vous plaît réessayez après 5 secondes."

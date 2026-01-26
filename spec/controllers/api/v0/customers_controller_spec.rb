@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 module Api
   RSpec.describe V0::CustomersController do
     include AuthenticationHelper
+
     render_views
 
     let(:user) { create(:user) }

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 RSpec.describe Api::Admin::OrderSerializer do
   let(:serializer) { described_class.new order }
   let(:order) { build(:order) }
@@ -44,7 +42,7 @@ RSpec.describe Api::Admin::OrderSerializer do
           order:,
           state: 'requires_authorization',
           amount: 123.45,
-          cvv_response_message: "https://stripe.com/redirect"
+          redirect_auth_url: "https://stripe.com/redirect"
         )
       end
 

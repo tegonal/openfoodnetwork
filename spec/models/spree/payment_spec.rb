@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.describe Spree::Payment do
+  before do
+    # mock the call with "ofn.payment_transition" so we don't call the related listener and services
+    allow(ActiveSupport::Notifications).to receive(:instrument).and_call_original
+    allow(ActiveSupport::Notifications).to receive(:instrument)
+      .with("ofn.payment_transition", any_args).and_return(nil)
+  end
+
   context 'original specs from Spree' do
     before { Stripe.api_key = "sk_test_12345" }
     let(:order) { create(:order) }
@@ -204,8 +209,9 @@ RSpec.describe Spree::Payment do
         context "authorization is required" do
           before do
             allow(success_response).to receive(:cvv_result) {
-              { 'code' => "123",
-                'message' => "https://stripe.com/redirect" }
+              { 'code' => nil,
+                'message' => nil,
+                'redirect_auth_url' => "https://stripe.com/redirect" }
             }
             expect(payment.payment_method).to receive(:authorize).with(
               amount_in_cents, card, anything
@@ -669,7 +675,7 @@ RSpec.describe Spree::Payment do
                 source: card,
                 payment_method:
               )
-            end.should raise_error(Spree::Core::GatewayError)
+            end.to raise_error(Spree::Core::GatewayError)
           end
         end
 
@@ -1047,11 +1053,11 @@ RSpec.describe Spree::Payment do
   end
 
   describe "#clear_authorization_url" do
-    let(:payment) { create(:payment, cvv_response_message: "message") }
+    let(:payment) { create(:payment, redirect_auth_url: "auth_url") }
 
-    it "removes the cvv_response_message" do
+    it "removes the redirect_auth_url" do
       payment.clear_authorization_url
-      expect(payment.cvv_response_message).to eq(nil)
+      expect(payment.redirect_auth_url).to eq(nil)
     end
   end
 
@@ -1061,6 +1067,19 @@ RSpec.describe Spree::Payment do
     it "sets :captured_at to the current time" do
       payment.complete
       expect(payment.captured_at).to be_present
+    end
+  end
+
+  describe "payment transition" do
+    it "notifies of payment status change" do
+      payment = create(:payment)
+
+      allow(ActiveSupport::Notifications).to receive(:instrument).and_call_original
+      expect(ActiveSupport::Notifications).to receive(:instrument).with(
+        "ofn.payment_transition", payment: payment, event: "processing"
+      )
+
+      payment.started_processing!
     end
   end
 end

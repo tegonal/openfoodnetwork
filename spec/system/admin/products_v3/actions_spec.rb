@@ -27,7 +27,7 @@ RSpec.describe 'As an enterprise user, I can manage my products' do
       # displays buttons to add products with the correct links
       expect(page).to have_link(class: "button", text: "New Product", href: "/admin/products/new")
       expect(page).to have_link(class: "button", text: "Import multiple products",
-                                href: "/admin/products/import")
+                                href: admin_product_import_path)
     end
   end
 
@@ -306,7 +306,7 @@ RSpec.describe 'As an enterprise user, I can manage my products' do
 
         within "table.products" do
           # Products does not include the cloned product.
-          expect(all_input_values).not_to match /COPY OF #{('L' * 254)}/
+          expect(all_input_values).not_to match /COPY OF #{'L' * 254}/
         end
       end
     end

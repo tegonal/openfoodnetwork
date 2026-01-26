@@ -6,7 +6,14 @@ RSpec.describe "DFC Permissions", feature: "cqcm-dev", vcr: true do
   let(:enterprise) { create(:enterprise) }
 
   before do
+    skip "Puffing Billy seems to make our rspec processes hang at the end."
+  end
+
+  before do
     login_as enterprise.owner
+
+    # Disable data proxy webhook which can't reach our test server.
+    allow_any_instance_of(ProxyNotifier).to receive(:refresh)
   end
 
   it "is not visible when no platform is enabled" do
@@ -61,9 +68,9 @@ RSpec.describe "DFC Permissions", feature: "cqcm-dev", vcr: true do
     end
   end
 
-  def within_platform_list(variant, &block)
+  def within_platform_list(variant, &)
     retry_expectations(on: Ferrum::JavaScriptError) do
-      within(platform_list(variant), &block)
+      within(platform_list(variant), &)
     end
   end
 
