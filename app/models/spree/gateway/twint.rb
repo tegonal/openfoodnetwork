@@ -76,13 +76,16 @@ module Spree
 
         payment_intent = Stripe::PaymentIntent.create(
           {
-            amount: (@order.total * 100).to_i,
-            currency: 'chf',
+            amount: (@order.total * 100).to_i, # Convert to cents
+            currency: 'chf', # Swiss Francs for Twint
             payment_method_types: ['twint'],
-            description: "Order ##{@order.number} - #{@order.email} - #{@order.bill_address&.firstname} #{@order.bill_address&.lastname}"
-          },
-          {
-            stripe_account: stripe_account_id
+            description: "Order ##{@order.number} - #{@order.email}",
+            metadata: {
+              order_number: @order.number,
+              customer_email: @order.email
+            },
+            transfer_data: {
+              destination: stripe_account_id
           }
         )
         payment_intent.id
