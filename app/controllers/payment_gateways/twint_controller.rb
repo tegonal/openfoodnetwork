@@ -33,22 +33,6 @@ module PaymentGateways
                               payment_total: @order.total,
                               completed_at: Time.zone.now)
 
-        Rails.logger.info("Attempting to send confirmation email for order #{@order.number} to #{@order.email}")
-        Rails.logger.info("Order details - Number: #{@order.number}, Email: #{@order.email}, Distributor: #{@order.distributor&.name}")
-
-        if @order.email.blank?
-          Rails.logger.error("Cannot send email - order has no email address")
-          redirect_to order_completion_route
-          return
-        end
-
-        begin
-          Spree::OrderMailer.confirm_email_for_customer(@order).deliver_now
-          Rails.logger.info("Successfully queued confirmation email for order #{@order.number}")
-        rescue StandardError => e
-          Rails.logger.error("Failed to send confirmation email for order #{@order.number}: #{e.message}")
-          Rails.logger.error(e.backtrace.join("\n"))
-        end
         @order.finalize!
         # Redirect to the order completion route
         redirect_to order_completion_route
