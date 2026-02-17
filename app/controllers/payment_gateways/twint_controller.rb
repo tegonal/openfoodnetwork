@@ -21,6 +21,12 @@ module PaymentGateways
         processing_failed
         redirect_to order_failed_route
       else
+        # Update the transfer description on Stripe (so connected account sees order info)
+        # Try synchronously first, and enqueue a retry job a few seconds later in case
+        # Stripe hasn't created the Transfer object yet.
+        update_stripe_transfer_description(params['payment_intent'])
+        UpdateStripeTransferJob.set(wait: 5.seconds).perform_later(params['payment_intent'], @order.id)
+
         # Mark all pending payments as completed
         @order.pending_payments.each do |payment|
           payment.update_columns(state: "completed", captured_at: Time.zone.now)
@@ -102,6 +108,63 @@ module PaymentGateways
       rescue Stripe::StripeError => e
         Rails.logger.error("Failed to fetch payment intent #{payment_intent_id}: #{e.message}")
         nil
+      end
+    end
+
+    # Update the Stripe Transfer (created for destination charges) with a human description
+    # so the connected account sees Order# and email instead of a py_xxx id.
+    def update_stripe_transfer_description(payment_intent_id)
+      return unless payment_intent_id.present?
+
+      begin
+        pi = Stripe::PaymentIntent.retrieve(payment_intent_id)
+
+        # Try to read the charge from the PaymentIntent. Sometimes `pi.charges` is empty
+        # (not expanded) or not yet populated, so fall back to listing charges by payment_intent.
+        charge = nil
+        if pi.respond_to?(:charges) && pi.charges.respond_to?(:data) && pi.charges.data.present?
+          charge = pi.charges.data.first
+        else
+          begin
+            charges_list = Stripe::Charge.list(payment_intent: payment_intent_id, limit: 1)
+            charge = charges_list.data.first
+          rescue Stripe::StripeError => e
+            Rails.logger.error("[Twint] Failed to list charges for PaymentIntent #{payment_intent_id}: #{e.message}")
+          end
+        end
+
+        transfer_id = charge&.transfer
+
+        if transfer_id.present?
+          description = "Order ##{@order&.number} - #{@order&.email}"
+          metadata = { order_number: @order&.number, customer_email: @order&.email }
+
+          # Update the Charge description/metadata (what many dashboards display)
+          if charge.present?
+            begin
+              Stripe::Charge.update(charge.id, { description: description, metadata: metadata })
+              Rails.logger.info("[Twint] Updated Stripe Charge #{charge.id} description=#{description}")
+            rescue Stripe::StripeError => e
+              Rails.logger.error("[Twint] Failed to update Charge #{charge.id}: #{e.message}")
+            end
+          else
+            Rails.logger.info("[Twint] Charge not found for PaymentIntent #{payment_intent_id}; cannot update charge description")
+          end
+
+          # Update the Transfer's description/metadata as well
+          begin
+            Stripe::Transfer.update(transfer_id, { description: description, metadata: metadata })
+            Rails.logger.info("[Twint] Updated Stripe Transfer #{transfer_id} with description=#{description}")
+          rescue Stripe::StripeError => e
+            Rails.logger.error("[Twint] Failed to update Transfer #{transfer_id}: #{e.message}")
+          end
+        else
+          Rails.logger.info("[Twint] No transfer id found for PaymentIntent #{payment_intent_id}; skipping transfer update")
+        end
+      rescue Stripe::StripeError => e
+        Rails.logger.error("[Twint] Failed to update transfer for PaymentIntent #{payment_intent_id}: #{e.message}")
+      rescue StandardError => e
+        Rails.logger.error("[Twint] Unexpected error updating transfer for PaymentIntent #{payment_intent_id}: #{e.message}")
       end
     end
   end
