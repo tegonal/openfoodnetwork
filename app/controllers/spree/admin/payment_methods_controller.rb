@@ -175,7 +175,8 @@ module Spree
       end
 
       def stripe_provider?(provider)
-        provider.name.ends_with?("StripeSCA")
+        name = provider.respond_to?(:name) ? provider.name : provider.to_s
+        name.end_with?("StripeSCA")
       end
 
       def twint_payment_method?
@@ -183,7 +184,8 @@ module Spree
       end
 
       def twint_provider?(provider)
-        provider.name.ends_with?("Twint")
+        name = provider.respond_to?(:name) ? provider.name : provider.to_s
+        name.end_with?("Twint")
       end
 
       def base_params
