@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Spree
   class Gateway
     class Twint < Gateway
@@ -82,6 +80,7 @@ module Spree
             },
             transfer_data: {
               destination: stripe_account_id
+            }
           }
         )
         payment_intent.id
