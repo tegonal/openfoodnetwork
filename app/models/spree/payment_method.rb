@@ -61,7 +61,7 @@ module Spree
     end
 
     def configured?
-      !stripe? || stripe_configured?
+      (!twint? && !stripe?) || stripe_configured?
     end
 
     def provider_class
@@ -139,6 +139,10 @@ module Spree
 
     def stripe?
       type.ends_with?("StripeSCA")
+    end
+
+    def twint?
+      type.ends_with?("Twint")
     end
 
     def stripe_configured?
