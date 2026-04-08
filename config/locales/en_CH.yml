@@ -1,4 +1,5 @@
 en_CH:
+  language_name: "English"
   enterprise_mailer:
     welcome:
       userguide: "Open Food Switzerland User Guide"
