@@ -4728,6 +4728,7 @@ en:
           stripesca: "Stripe SCA"
           taler: "Taler"
           customercredit: "Customer Credit"
+          twint: "Twint"
       payments:
         source_forms:
           stripe:
@@ -5032,6 +5033,8 @@ en:
         cancel: "Don't want to use PayPal? No problems."
         connection_failed: "Could not connect to PayPal."
         generic_error: "PayPal failed. %{reasons}"
+    twint:
+      minimum_amount_error: "The minimum amount for a Twint payment is %{amount}."
     users:
       api_keys:
         regenerate_key: "Regenerate Key"

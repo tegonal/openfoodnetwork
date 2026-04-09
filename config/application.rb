@@ -126,7 +126,17 @@ module Openfoodnetwork
       end
     end
 
-    initializer "ofn.reports" do |_app|
+    # Register Spree payment methods
+    initializer "spree.gateway.payment_methods", :after => "spree.register.payment_methods" do |app|
+      Rails.application.reloader.to_prepare do
+        app.config.spree.payment_methods ||= []
+        app.config.spree.payment_methods << Spree::Gateway::StripeSCA
+        app.config.spree.payment_methods << Spree::Gateway::PayPalExpress
+        app.config.spree.payment_methods << Spree::Gateway::Twint
+      end
+    end
+
+    initializer "ofn.reports" do |app|
       module ::Reporting; end
       Rails.application.reloader.to_prepare do
         next if defined?(::Reporting::Errors)
