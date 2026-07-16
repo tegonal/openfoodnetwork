@@ -73,6 +73,6 @@
     "karma-coffee-preprocessor": "~1.0.1",
     "karma-jasmine": "~0.3.8",
     "prettier": "*",
-    "webpack-dev-server": "^4.9.0"
+    "webpack-dev-server": "^5.2.5"
   }
 }
