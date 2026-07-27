@@ -6,6 +6,10 @@ module Spree
       include Rails.application.routes.url_helpers
       preference :enterprise_id, :integer
 
+      VOIDABLE_STATES = [
+        "requires_payment_method", "requires_capture", "requires_confirmation", "requires_action"
+      ].freeze
+
       validate :ensure_enterprise_selected
 
       def external_gateway?
@@ -57,6 +61,34 @@ module Spree
         )
       end
 
+      # NOTE: this method is required by Spree::Payment::Processing
+      # If the PaymentIntent is still in a cancellable state, cancel it.
+      # If it has already been confirmed/captured, issue a full refund instead.
+      def void(payment_intent_id, gateway_options)
+        payment_intent_response = Stripe::PaymentIntent.retrieve(
+          payment_intent_id, { stripe_account: stripe_account_id }
+        )
+        gateway_options[:stripe_account] = stripe_account_id
+
+        if voidable?(payment_intent_response)
+          provider.void(payment_intent_id, gateway_options)
+        else
+          provider.refund(
+            payment_intent_response.amount_received, payment_intent_id, gateway_options
+          )
+        end
+      rescue Stripe::StripeError => e
+        handle_stripe_error(e)
+      end
+
+      # NOTE: this method is required by Spree::Payment::Processing
+      def credit(money, payment_intent_id, gateway_options)
+        gateway_options[:stripe_account] = stripe_account_id
+        provider.refund(money, payment_intent_id, gateway_options)
+      rescue Stripe::StripeError => e
+        handle_stripe_error(e)
+      end
+
       def handle_stripe_error(error)
         ActiveMerchant::Billing::Response.new(false, error.message)
       end
@@ -88,6 +120,12 @@ module Spree
         payment_intent.id
       rescue Stripe::StripeError => e
         handle_stripe_error(e)
+      end
+
+      private
+
+      def voidable?(payment_intent_response)
+        VOIDABLE_STATES.include?(payment_intent_response.status)
       end
     end
   end
