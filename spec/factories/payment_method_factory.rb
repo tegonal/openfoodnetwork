@@ -31,6 +31,13 @@ FactoryBot.define do
     distributors { [Enterprise.is_distributor.first || FactoryBot.create(:distributor_enterprise)] }
   end
 
+  factory :twint_payment_method, class: Spree::Gateway::Twint do
+    name { 'Twint' }
+    environment { 'test' }
+    distributors { [FactoryBot.create(:stripe_account).enterprise] }
+    preferred_enterprise_id { distributors.first.id }
+  end
+
   factory :distributor_payment_method, class: DistributorPaymentMethod do
     distributor { FactoryBot.create(:distributor_enterprise) }
     payment_method { FactoryBot.create(:payment_method) }
