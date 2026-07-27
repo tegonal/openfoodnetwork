@@ -5,6 +5,8 @@ module PaymentGateways
     include OrderStockCheck
     include OrderCompletion
 
+    protect_from_forgery except: :webhook
+
     before_action :load_checkout_order, only: :confirm
     before_action :check_order_cycle_expiry, only: :confirm
 
@@ -53,6 +55,39 @@ module PaymentGateways
         # Redirect to the order completion route
         redirect_to order_completion_route
       end
+    end
+
+    # POST /payment_gateways/twint/webhook
+    # Stripe sends events here when a Twint payment changes state.
+    # This covers the case where the customer closes the browser before being
+    # redirected back — the front-end confirm action would never fire, but the
+    # webhook still delivers confirmation.
+    def webhook
+      payload   = request.raw_post
+      signature = request.headers["HTTP_STRIPE_SIGNATURE"]
+      secret    = ENV.fetch("TWINT_WEBHOOK_SECRET", nil)
+
+      if secret.blank?
+        Rails.logger.warn("TWINT_WEBHOOK_SECRET not configured, rejecting webhook")
+        return render body: nil, status: :unauthorized
+      end
+
+      begin
+        event = Stripe::Webhook.construct_event(payload, signature, secret)
+      rescue JSON::ParserError
+        return render body: nil, status: :bad_request
+      rescue Stripe::SignatureVerificationError
+        return render body: nil, status: :unauthorized
+      end
+
+      case event.type
+      when "payment_intent.succeeded"
+        handle_payment_succeeded(event.data.object)
+      when "payment_intent.payment_failed"
+        handle_payment_failed(event.data.object)
+      end
+
+      render body: nil, status: :ok
     end
 
     private
@@ -119,6 +154,40 @@ module PaymentGateways
         Rails.logger.error("Failed to fetch payment intent #{payment_intent_id}: #{e.message}")
         nil
       end
+    end
+
+    # Called from the webhook action when Stripe confirms the payment succeeded.
+    # Idempotent: safe to call more than once for the same payment intent.
+    def handle_payment_succeeded(payment_intent)
+      payment = Spree::Payment.find_by(response_code: payment_intent.id)
+      return unless payment
+
+      order = payment.order
+      return if order.complete? # already done — nothing to do
+
+      return unless order.state.in?(%w[payment confirmation])
+
+      ActiveRecord::Base.transaction do
+        payment.complete! unless payment.completed?
+        Orders::WorkflowService.new(order).complete
+      end
+    rescue StandardError => e
+      Rails.logger.error(
+        "Twint webhook: failed to complete order #{order&.number}: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+      )
+    end
+
+    # Called from the webhook action when Stripe reports the payment failed.
+    def handle_payment_failed(payment_intent)
+      payment = Spree::Payment.find_by(response_code: payment_intent.id)
+      return unless payment
+      return if payment.order.complete? # can't void a completed order's payment
+
+      payment.void! if payment.can_void?
+    rescue StandardError => e
+      Rails.logger.error(
+        "Twint webhook: failed to void payment for intent #{payment_intent&.id}: #{e.message}"
+      )
     end
   end
 end
