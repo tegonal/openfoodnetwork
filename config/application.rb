@@ -161,7 +161,7 @@ module Openfoodnetwork
         app.config.spree.payment_methods ||= []
         app.config.spree.payment_methods << Spree::Gateway::StripeSCA
         app.config.spree.payment_methods << Spree::Gateway::PayPalExpress
-        app.config.spree.payment_methods << "Spree::Gateway::Twint".constantize
+        app.config.spree.payment_methods << Spree::Gateway::Twint
       end
     end
 
