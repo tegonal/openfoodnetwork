@@ -89,6 +89,7 @@ Openfoodnetwork::Application.routes.draw do
 
     get "/taler/:payment_id", to: "taler#confirm", as: :confirm_taler
     get "/twint/confirm", to: "twint#confirm", as: :confirm_twint
+    post "/twint/webhook", to: "twint#webhook", as: :twint_webhook
   end
 
   get '/checkout', to: 'checkout#edit'
