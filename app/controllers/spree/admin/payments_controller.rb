@@ -130,10 +130,14 @@ module Spree
       def load_data
         @amount = params[:amount] || load_order.total
 
-        # Only show payments for the order's distributor
+        # Only show payments for the order's distributor.
+        # Exclude external redirect gateways (e.g. Twint) — they require the
+        # customer to complete payment via a redirect and cannot be triggered
+        # by a shop manager on behalf of a customer.
         @payment_methods = PaymentMethod.
           available(:back_end).
-          for_distributor(@order.distributor)
+          for_distributor(@order.distributor).
+          reject { |pm| pm.is_a?(Spree::Gateway::Twint) }
 
         @payment_method = if @payment&.payment_method
                             @payment.payment_method
