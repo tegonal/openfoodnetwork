@@ -25,7 +25,11 @@ module Spree
       end
 
       def payment_profiles_supported?
-        true
+        false
+      end
+
+      def source_required?
+        false
       end
 
       def stripe_account_id
