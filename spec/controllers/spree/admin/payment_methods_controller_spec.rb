@@ -31,6 +31,38 @@ RSpec.describe Spree::Admin::PaymentMethodsController do
 
       expect(providers).to include "Spree::Gateway::StripeSCA"
     end
+
+    context "with Twint" do
+      it "does not show Twint when Stripe is not enabled" do
+        allow(Spree::Config).to receive(:stripe_connect_enabled).and_return(false)
+        stub_const("ENV", ENV.to_h.merge("CURRENCY" => "CHF"))
+
+        spree_get :new
+        providers = assigns(:providers).map(&:to_s)
+
+        expect(providers).not_to include "Spree::Gateway::Twint"
+      end
+
+      it "does not show Twint when Stripe is enabled but currency is not CHF" do
+        allow(Spree::Config).to receive(:stripe_connect_enabled).and_return(true)
+        stub_const("ENV", ENV.to_h.merge("CURRENCY" => "EUR"))
+
+        spree_get :new
+        providers = assigns(:providers).map(&:to_s)
+
+        expect(providers).not_to include "Spree::Gateway::Twint"
+      end
+
+      it "shows Twint when Stripe is enabled and currency is CHF" do
+        allow(Spree::Config).to receive(:stripe_connect_enabled).and_return(true)
+        stub_const("ENV", ENV.to_h.merge("CURRENCY" => "CHF"))
+
+        spree_get :new
+        providers = assigns(:providers).map(&:to_s)
+
+        expect(providers).to include "Spree::Gateway::Twint"
+      end
+    end
   end
 
   describe "#edit" do
@@ -52,6 +84,26 @@ RSpec.describe Spree::Admin::PaymentMethodsController do
       providers = assigns(:providers).map(&:to_s)
 
       expect(providers).to include "Spree::Gateway::StripeSCA"
+    end
+
+    context "with an existing Twint payment method" do
+      let(:twint) {
+        create(
+          :twint_payment_method,
+          distributor_ids: [enterprise_id],
+          preferred_enterprise_id: enterprise_id
+        )
+      }
+
+      it "shows Twint even when currency is not CHF" do
+        allow(Spree::Config).to receive(:stripe_connect_enabled).and_return(true)
+        stub_const("ENV", ENV.to_h.merge("CURRENCY" => "EUR"))
+
+        spree_get :edit, id: twint.id
+        providers = assigns(:providers).map(&:to_s)
+
+        expect(providers).to include "Spree::Gateway::Twint"
+      end
     end
   end
 
