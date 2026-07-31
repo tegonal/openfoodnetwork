@@ -13,48 +13,19 @@ module PaymentGateways
     def confirm
       validate_stock
 
-      # Redirect to the failure page if any items are out of stock
-      redirect_to order_failed_route if @any_out_of_stock == true
+      return redirect_to order_failed_route if @any_out_of_stock == true
 
-      # Validate the payment intent
-      validate_payment_intent
-
-      if params["redirect_status"] != "succeeded" || !valid_payment_intent?
+      unless valid_payment_intent?
         processing_failed
-        redirect_to order_failed_route
-      else
-        # Mark all pending payments as completed
-        @order.pending_payments.each do |payment|
-          payment.update_columns(state: "completed", captured_at: Time.zone.now)
-        end
-
-        # Update the order's state to complete
-        @order.update_columns(payment_state: "paid",
-                              shipment_state: "ready",
-                              state: "complete",
-                              payment_total: @order.total,
-                              completed_at: Time.zone.now)
-
-        Rails.logger.info("Attempting to send confirmation email for order #{@order.number} to #{@order.email}")
-        Rails.logger.info("Order details - Number: #{@order.number}, Email: #{@order.email}, Distributor: #{@order.distributor&.name}")
-
-        if @order.email.blank?
-          Rails.logger.error("Cannot send email - order has no email address")
-          redirect_to order_completion_route
-          return
-        end
-
-        begin
-          Spree::OrderMailer.confirm_email_for_customer(@order).deliver_now
-          Rails.logger.info("Successfully queued confirmation email for order #{@order.number}")
-        rescue StandardError => e
-          Rails.logger.error("Failed to send confirmation email for order #{@order.number}: #{e.message}")
-          Rails.logger.error(e.backtrace.join("\n"))
-        end
-        @order.finalize!
-        # Redirect to the order completion route
-        redirect_to order_completion_route
+        return redirect_to order_failed_route
       end
+
+      unless params["redirect_status"] == "succeeded"
+        processing_failed
+        return redirect_to order_failed_route
+      end
+
+      complete_order
     end
 
     # POST /payment_gateways/twint/webhook
@@ -99,18 +70,22 @@ module PaymentGateways
       handle_insufficient_stock
     end
 
-    def validate_payment_intent
-      max_attempts = 12 
-      attempts = 0
-
-      # Poll for the redirect_status to change from "pending"
-      while params["redirect_status"].in?(["pending", "requires_action"]) && attempts < max_attempts
-        Rails.logger.info("Attempt #{attempts}: redirect_status is #{params['redirect_status']}")
-        sleep(2)
-        attempts += 1
-        params["redirect_status"] = fetch_redirect_status_from_stripe(params["payment_intent"])
-        Rails.logger.info("Attempt #{attempts}: the new redirect_status is#{params['redirect_status']}")
+    def complete_order
+      ActiveRecord::Base.transaction do
+        last_payment.complete! unless last_payment.completed?
       end
+
+      if Orders::WorkflowService.new(@order).next && @order.complete?
+        processing_succeeded
+        redirect_to order_completion_route
+      else
+        processing_failed
+        redirect_to order_failed_route
+      end
+    rescue Spree::Core::GatewayError => e
+      gateway_error(e)
+      processing_failed
+      redirect_to order_failed_route
     end
 
     def valid_payment_intent?
@@ -139,21 +114,6 @@ module PaymentGateways
         payment.adjustment&.update_columns(eligible: false, state: "finalized")
       end
       flash[:notice] = I18n.t("checkout.payment_cancelled_due_to_stock")
-    end
-
-    def fetch_redirect_status_from_stripe(payment_intent_id)
-      return nil unless payment_intent_id
-
-      begin
-        # Fetch the payment intent from Stripe
-        payment_intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
-
-        # Extract the redirect status from the payment intent
-        payment_intent["status"] # This could be "succeeded", "requires_payment_method", "failed", etc.
-      rescue Stripe::StripeError => e
-        Rails.logger.error("Failed to fetch payment intent #{payment_intent_id}: #{e.message}")
-        nil
-      end
     end
 
     # Called from the webhook action when Stripe confirms the payment succeeded.
