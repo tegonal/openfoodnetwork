@@ -77,7 +77,7 @@ RSpec.describe Spree::Admin::PaymentMethodsController do
 
     before { allow(controller).to receive(:spree_current_user) { user } }
 
-    it "shows the current gateway type even if not enabled" do
+    it "shows the current gateway type even if Stripe is not enabled" do
       allow(Spree::Config).to receive(:stripe_connect_enabled).and_return(false)
 
       spree_get :edit, id: stripe.id
@@ -95,7 +95,7 @@ RSpec.describe Spree::Admin::PaymentMethodsController do
         )
       }
 
-      it "shows Twint even when currency is not CHF" do
+      it "shows Twint even when currency is not CHF, so the admin can manage it" do
         allow(Spree::Config).to receive(:stripe_connect_enabled).and_return(true)
         stub_const("ENV", ENV.to_h.merge("CURRENCY" => "EUR"))
 
