@@ -144,20 +144,26 @@ module Spree
           providers.reject! { |provider| twint_provider?(provider) }
         end
 
+        # Always include the current payment method's provider type so that
+        # editing works even when the provider wouldn't normally be shown
+        # (e.g. Twint on a non-CHF instance, or Stripe when disabled).
+        if @payment_method&.type.present?
+          current = PAYMENT_METHODS.find { |p| p.to_s == @payment_method.type }
+          providers.unshift(current) if current && providers.exclude?(current)
+        end
+
         providers
       end
 
-      # Show Stripe as an option if enabled, or if the
-      # current payment_method is already a Stripe method
+      # Show Stripe as an option when enabled.
       def show_stripe?
-        Spree::Config.stripe_connect_enabled ||
-          stripe_payment_method?
+        Spree::Config.stripe_connect_enabled
       end
 
+      # Show Twint as an option only when Stripe Connect is enabled and the
+      # instance currency is CHF (Twint is a Swiss-only payment method).
       def show_twint?
-        (Spree::Config.stripe_connect_enabled &&
-          ENV['CURRENCY'] == "CHF") ||
-          twint_payment_method?
+        Spree::Config.stripe_connect_enabled && ENV['CURRENCY'] == "CHF"
       end
 
       def restrict_stripe_account_change
