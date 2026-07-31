@@ -27,8 +27,14 @@ RSpec.describe Spree::Gateway::Twint do
   end
 
   describe "#payment_profiles_supported?" do
-    it "returns true" do
-      expect(payment_method.payment_profiles_supported?).to eq true
+    it "returns false" do
+      expect(payment_method.payment_profiles_supported?).to eq false
+    end
+  end
+
+  describe "#source_required?" do
+    it "returns false" do
+      expect(payment_method.source_required?).to eq false
     end
   end
 
@@ -100,6 +106,81 @@ RSpec.describe Spree::Gateway::Twint do
     it "confirms the payment intent" do
       result = payment_method.confirm_payment(payment_intent_id)
       expect(result.id).to eq payment_intent_id
+    end
+  end
+
+  describe "#void" do
+    let(:stripe_account_id) { "acct_123" }
+    let(:gateway_options) { { currency: "CHF", order_id: order.number } }
+    let(:provider) { instance_double(ActiveMerchant::Billing::StripePaymentIntentsGateway) }
+
+    before do
+      allow(payment_method).to receive(:stripe_account_id).and_return(stripe_account_id)
+      allow(payment_method).to receive(:provider).and_return(provider)
+    end
+
+    context "when the payment intent is in a voidable state" do
+      before do
+        allow(Stripe::PaymentIntent).to receive(:retrieve).and_return(
+          double("PaymentIntent", status: "requires_capture", amount_received: 220)
+        )
+      end
+
+      it "cancels the payment intent via provider.void" do
+        expect(provider).to receive(:void).with("pi_123", hash_including(stripe_account: stripe_account_id))
+        payment_method.void("pi_123", gateway_options)
+      end
+    end
+
+    context "when the payment intent has already been captured" do
+      before do
+        allow(Stripe::PaymentIntent).to receive(:retrieve).and_return(
+          double("PaymentIntent", status: "succeeded", amount_received: 220)
+        )
+      end
+
+      it "refunds the full amount via provider.refund" do
+        expect(provider).to receive(:refund).with(220, "pi_123", hash_including(stripe_account: stripe_account_id))
+        payment_method.void("pi_123", gateway_options)
+      end
+    end
+
+    context "when Stripe raises an error" do
+      before do
+        allow(Stripe::PaymentIntent).to receive(:retrieve).and_raise(Stripe::StripeError.new("error"))
+      end
+
+      it "returns a failed ActiveMerchant response" do
+        result = payment_method.void("pi_123", gateway_options)
+        expect(result.success?).to eq false
+      end
+    end
+  end
+
+  describe "#credit" do
+    let(:stripe_account_id) { "acct_123" }
+    let(:gateway_options) { { currency: "CHF", order_id: order.number } }
+    let(:provider) { instance_double(ActiveMerchant::Billing::StripePaymentIntentsGateway) }
+
+    before do
+      allow(payment_method).to receive(:stripe_account_id).and_return(stripe_account_id)
+      allow(payment_method).to receive(:provider).and_return(provider)
+    end
+
+    it "issues a partial refund via provider.refund" do
+      expect(provider).to receive(:refund).with(110, "pi_123", hash_including(stripe_account: stripe_account_id))
+      payment_method.credit(110, "pi_123", gateway_options)
+    end
+
+    context "when Stripe raises an error" do
+      before do
+        allow(provider).to receive(:refund).and_raise(Stripe::StripeError.new("error"))
+      end
+
+      it "returns a failed ActiveMerchant response" do
+        result = payment_method.credit(110, "pi_123", gateway_options)
+        expect(result.success?).to eq false
+      end
     end
   end
 

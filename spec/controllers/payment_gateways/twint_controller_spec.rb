@@ -18,57 +18,213 @@ RSpec.describe PaymentGateways::TwintController do
   end
 
   describe "#confirm" do
-    context "when the payment intent is valid" do
+    context "when the payment intent is valid and redirect_status is succeeded" do
       before do
         allow(controller).to receive(:valid_payment_intent?).and_return(true)
-        allow(controller).to receive(:validate_stock).and_return(true)
+        allow(controller).to receive(:validate_stock)
+        allow(controller).to receive(:complete_order)
         allow(controller).to receive(:params).and_return({ "redirect_status" => "succeeded",
                                                            "payment_intent" => "pi_123" })
-
-        workflow_service = instance_double("Orders::WorkflowService")
-        allow(Orders::WorkflowService).to receive(:new).with(order).and_return(workflow_service)
-        allow(workflow_service).to receive(:next).and_return(true)
-        allow(order).to receive(:complete?).and_return(true)
       end
 
-      it "calls validate_stock and redirects to the confirmation page" do
+      it "calls validate_stock and complete_order" do
         expect(controller).to receive(:validate_stock)
+        expect(controller).to receive(:complete_order)
 
         get :confirm, params: { payment_intent: "pi_123", redirect_status: "succeeded" }
-
-        expect(response).to redirect_to order_path(order, order_token: order.token)
-      end
-      context "when the order cycle has closed" do
-        it "redirects to shopfront with message if order cycle is expired" do
-          allow(controller).to receive(:current_distributor).and_return(distributor)
-          expect(controller).to receive(:current_order_cycle).and_return(order_cycle)
-          expect(controller).to receive(:current_order).and_return(order).at_least(:once)
-          expect(order_cycle).to receive(:closed?).and_return(true)
-          expect(order).to receive(:empty!)
-          expect(order).to receive(:assign_order_cycle!).with(nil)
-
-          get :confirm, params: { payment_intent: "pi_123" }
-
-          expect(response).to redirect_to shop_url
-          expect(flash[:info]).to eq(
-            "The order cycle you've selected has just closed. Please try again!"
-          )
-        end
       end
     end
+
+    context "when the order cycle has closed" do
+      it "redirects to shopfront with message if order cycle is expired" do
+        allow(controller).to receive(:current_distributor).and_return(distributor)
+        expect(controller).to receive(:current_order_cycle).and_return(order_cycle)
+        expect(controller).to receive(:current_order).and_return(order).at_least(:once)
+        expect(order_cycle).to receive(:closed?).and_return(true)
+        expect(order).to receive(:empty!)
+        expect(order).to receive(:assign_order_cycle!).with(nil)
+
+        get :confirm, params: { payment_intent: "pi_123" }
+
+        expect(response).to redirect_to shop_url
+        expect(flash[:info]).to eq(
+          "The order cycle you've selected has just closed. Please try again!"
+        )
+      end
+    end
+
     context "when the payment intent is invalid" do
       before do
         allow(controller).to receive(:valid_payment_intent?).and_return(false)
-        allow(controller).to receive(:params).and_return({ "redirect_status" => "failed",
-                                                           "payment_intent" => "pi_123" })
       end
 
-      it "does not call validate_stock and redirects to the failed order route" do
-        expect(controller).not_to receive(:validate_stock)
+      it "redirects to the failed order route without calling complete_order" do
+        expect(controller).not_to receive(:complete_order)
 
         get :confirm, params: { payment_intent: "pi_123", redirect_status: "failed" }
 
         expect(response).to redirect_to "/order_failed"
+      end
+    end
+
+    context "when redirect_status is not succeeded" do
+      before do
+        allow(controller).to receive(:valid_payment_intent?).and_return(true)
+        allow(controller).to receive(:validate_stock)
+      end
+
+      it "redirects to the failed order route" do
+        expect(controller).not_to receive(:complete_order)
+
+        get :confirm, params: { payment_intent: "pi_123", redirect_status: "failed" }
+
+        expect(response).to redirect_to "/order_failed"
+      end
+    end
+  end
+
+  describe "#complete_order" do
+    let(:last_payment) { instance_double("Spree::Payment", completed?: false) }
+    let(:workflow_service) { instance_double("Orders::WorkflowService") }
+
+    before do
+      controller.instance_variable_set(:@order, order)
+      allow(controller).to receive(:last_payment).and_return(last_payment)
+      allow(controller).to receive(:order_completion_route).and_return("/completed")
+      allow(controller).to receive(:order_failed_route).and_return("/order_failed")
+      allow(Orders::WorkflowService).to receive(:new).with(order).and_return(workflow_service)
+    end
+
+    context "when workflow advances and order is complete" do
+      before do
+        allow(last_payment).to receive(:complete!)
+        allow(workflow_service).to receive(:next).and_return(true)
+        allow(order).to receive(:complete?).and_return(true)
+        allow(controller).to receive(:processing_succeeded)
+      end
+
+      it "completes the payment and calls processing_succeeded" do
+        expect(last_payment).to receive(:complete!)
+        expect(controller).to receive(:processing_succeeded)
+
+        controller.__send__(:complete_order)
+      end
+    end
+
+    context "when the payment is already completed" do
+      before do
+        allow(last_payment).to receive(:completed?).and_return(true)
+        allow(workflow_service).to receive(:next).and_return(true)
+        allow(order).to receive(:complete?).and_return(true)
+        allow(controller).to receive(:processing_succeeded)
+      end
+
+      it "does not call complete! again" do
+        expect(last_payment).not_to receive(:complete!)
+
+        controller.__send__(:complete_order)
+      end
+    end
+
+    context "when the workflow fails to complete the order" do
+      before do
+        allow(last_payment).to receive(:complete!)
+        allow(workflow_service).to receive(:next).and_return(false)
+        allow(order).to receive(:complete?).and_return(false)
+        allow(controller).to receive(:processing_failed)
+      end
+
+      it "calls processing_failed and redirects to failed route" do
+        expect(controller).to receive(:processing_failed)
+
+        controller.__send__(:complete_order)
+
+        expect(response).to redirect_to "/order_failed"
+      end
+    end
+  end
+
+  describe "#webhook" do
+    let(:payment_intent_id) { "pi_123" }
+    let(:event_params) do
+      {
+        "id" => "evt_123",
+        "object" => "event",
+        "type" => "payment_intent.succeeded",
+        "data" => { "object" => { "id" => payment_intent_id } }
+      }
+    end
+
+    before do
+      allow(ENV).to receive(:fetch).with("TWINT_WEBHOOK_SECRET", nil).and_return("whsec_test")
+    end
+
+    context "when TWINT_WEBHOOK_SECRET is not configured" do
+      before do
+        allow(ENV).to receive(:fetch).with("TWINT_WEBHOOK_SECRET", nil).and_return(nil)
+      end
+
+      it "responds with 401" do
+        post :webhook, params: event_params
+        expect(response).to have_http_status :unauthorized
+      end
+    end
+
+    context "when JSON parsing fails" do
+      before do
+        allow(Stripe::Webhook).to receive(:construct_event).and_raise(JSON::ParserError)
+      end
+
+      it "responds with 400" do
+        post :webhook, params: event_params
+        expect(response).to have_http_status :bad_request
+      end
+    end
+
+    context "when signature verification fails" do
+      before do
+        allow(Stripe::Webhook).to receive(:construct_event)
+          .and_raise(Stripe::SignatureVerificationError.new("bad sig", "header"))
+      end
+
+      it "responds with 401" do
+        post :webhook, params: event_params
+        expect(response).to have_http_status :unauthorized
+      end
+    end
+
+    context "when signature verification succeeds" do
+      before do
+        allow(Stripe::Webhook).to receive(:construct_event) {
+          Stripe::Event.construct_from(event_params.deep_symbolize_keys)
+        }
+      end
+
+      context "with a payment_intent.succeeded event" do
+        it "calls handle_payment_succeeded and responds with 200" do
+          expect(controller).to receive(:handle_payment_succeeded)
+          post :webhook, params: event_params
+          expect(response).to have_http_status :ok
+        end
+      end
+
+      context "with a payment_intent.payment_failed event" do
+        before { event_params["type"] = "payment_intent.payment_failed" }
+
+        it "calls handle_payment_failed and responds with 200" do
+          expect(controller).to receive(:handle_payment_failed)
+          post :webhook, params: event_params
+          expect(response).to have_http_status :ok
+        end
+      end
+
+      context "with an unhandled event type" do
+        before { event_params["type"] = "charge.succeeded" }
+
+        it "responds with 200 without crashing" do
+          post :webhook, params: event_params
+          expect(response).to have_http_status :ok
+        end
       end
     end
   end
