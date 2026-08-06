@@ -156,12 +156,12 @@ RSpec.describe PaymentGateways::TwintController do
     end
 
     before do
-      allow(ENV).to receive(:fetch).with("TWINT_WEBHOOK_SECRET", nil).and_return("whsec_test")
+      allow(Stripe).to receive(:twint_webhook_secret).and_return("whsec_test")
     end
 
     context "when TWINT_WEBHOOK_SECRET is not configured" do
       before do
-        allow(ENV).to receive(:fetch).with("TWINT_WEBHOOK_SECRET", nil).and_return(nil)
+        allow(Stripe).to receive(:twint_webhook_secret).and_return(nil)
       end
 
       it "responds with 401" do
