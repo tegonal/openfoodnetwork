@@ -35,8 +35,8 @@ module PaymentGateways
     # webhook still delivers confirmation.
     def webhook
       payload   = request.raw_post
-      signature = request.headers["HTTP_STRIPE_SIGNATURE"]
-      secret    = ENV.fetch("TWINT_WEBHOOK_SECRET", nil)
+      signature = request.headers["Stripe-Signature"]
+      secret    = Stripe.twint_webhook_secret
 
       if secret.blank?
         Rails.logger.warn("TWINT_WEBHOOK_SECRET not configured, rejecting webhook")
