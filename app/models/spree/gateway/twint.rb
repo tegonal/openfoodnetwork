@@ -51,13 +51,15 @@ module Spree
       end
 
       def confirm_payment(payment_intent_id)
+        return_url = payment_gateways_confirm_twint_url(order_id: @order.number,
+                                                        order_token: @order.token)
         Rails.logger.info("Executing Twint purchase method for PaymentIntent: #{payment_intent_id}")
         Rails.logger.info("Twint PaymentIntent confirmation will use Stripe account: #{stripe_account_id}")
+        Rails.logger.info("Twint return_url: #{return_url}")
         Stripe::PaymentIntent.confirm(
           payment_intent_id,
           {
-            return_url: payment_gateways_confirm_twint_url(order_id: @order.number,
-                                                           order_token: @order.token),
+            return_url:,
             payment_method_data: { type: 'twint' }
           }, {
             stripe_account: stripe_account_id
