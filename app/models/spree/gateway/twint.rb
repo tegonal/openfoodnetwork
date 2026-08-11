@@ -125,7 +125,8 @@ module Spree
         )
         payment_intent.id
       rescue Stripe::StripeError => e
-        handle_stripe_error(e)
+        Rails.logger.error("Twint PaymentIntent creation failed: #{e.message}")
+        raise Core::GatewayError, e.message
       end
 
       private
