@@ -81,6 +81,26 @@ RSpec.describe PaymentGateways::TwintController do
         expect(response).to redirect_to "/order_failed"
       end
     end
+
+    context "when redirect_status is processing or pending" do
+      before do
+        allow(controller).to receive(:valid_payment_intent?).and_return(true)
+        allow(controller).to receive(:validate_stock)
+        allow(controller).to receive(:order_completion_route).and_return("/order_completion")
+      end
+
+      %w[processing pending].each do |status|
+        it "waits for the webhook instead of failing for redirect_status=#{status}" do
+          expect(controller).not_to receive(:complete_order)
+          expect(controller).not_to receive(:processing_failed)
+
+          get :confirm, params: { payment_intent: "pi_123", redirect_status: status }
+
+          expect(response).to redirect_to "/order_completion"
+          expect(flash[:notice]).to be_present
+        end
+      end
+    end
   end
 
   describe "#complete_order" do
