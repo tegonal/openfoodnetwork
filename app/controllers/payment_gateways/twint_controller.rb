@@ -20,12 +20,15 @@ module PaymentGateways
         return redirect_to order_failed_route
       end
 
-      unless params["redirect_status"] == "succeeded"
+      case params["redirect_status"]
+      when "succeeded"
+        complete_order
+      when "processing", "pending"
+        payment_pending
+      else
         processing_failed
-        return redirect_to order_failed_route
+        redirect_to order_failed_route
       end
-
-      complete_order
     end
 
     # POST /payment_gateways/twint/webhook
@@ -86,6 +89,20 @@ module PaymentGateways
       gateway_error(e)
       processing_failed
       redirect_to order_failed_route
+    end
+
+    # Twint confirmation is asynchronous: the customer approves the payment in
+    # the Twint app, so Stripe can redirect back here before that happens,
+    # reporting "processing"/"pending" rather than a final status. This must
+    # NOT be treated as a failure: processing_failed calls
+    # Orders::CheckoutRestartService, which destroys the Spree::Payment and
+    # resets the order to cart, making it impossible for the later
+    # `payment_intent.succeeded` webhook to find and complete the order.
+    # Instead we leave the order/payment untouched so the webhook can
+    # complete it once Stripe/Twint finalize the payment.
+    def payment_pending
+      flash[:notice] = I18n.t("spree.twint.payment_pending")
+      redirect_to order_completion_route
     end
 
     def valid_payment_intent?

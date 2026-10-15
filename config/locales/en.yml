@@ -5070,6 +5070,7 @@ en:
         generic_error: "PayPal failed. %{reasons}"
     twint:
       minimum_amount_error: "The minimum amount for a Twint payment is %{amount}."
+      payment_pending: "Your Twint payment is still being confirmed. You will receive a confirmation email once it's completed."
     users:
       api_keys:
         regenerate_key: "Regenerate Key"
