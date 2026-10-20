@@ -720,6 +720,7 @@ en:
         delete: Delete
         remove: Remove
         preview: Preview
+        share: Share
         create_linked_variant: Create linked variant
       image:
         edit: Edit

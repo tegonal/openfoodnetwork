@@ -73,5 +73,38 @@ RSpec.describe "Shop" do
         expect(response.body).to be_empty
       end
     end
+
+    context "when order_cycle_id is not provided but a current order cycle exists" do
+      it "renders modal HTML using the current order cycle" do
+        product = create(:simple_product, description: "<p>Fresh apples</p>")
+        order_cycle.exchanges.outgoing.first.variants << product.variants.first
+
+        get "/shop/product_modal", params: {
+          product_id: product.id
+        }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include(product.name)
+      end
+    end
+
+    context "when order_cycle_id is not provided and no current order cycle exists" do
+      let(:order_without_oc) { create(:order, distributor:) }
+
+      before do
+        session_hash[:order_id] = order_without_oc.id
+      end
+
+      it "returns not found" do
+        product = create(:simple_product)
+
+        get "/shop/product_modal", params: {
+          product_id: product.id
+        }
+
+        expect(response).to have_http_status(:not_found)
+        expect(response.body).to be_empty
+      end
+    end
   end
 end

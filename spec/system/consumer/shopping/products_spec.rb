@@ -159,6 +159,15 @@ RSpec.describe "As a consumer I want to view products" do
         expect(page).not_to have_selector("#shop-product-modal-container .reveal-modal")
       end
 
+      it "automatically opens the product modal when given a product_id query parameter" do
+        visit "#{enterprise_shop_path(distributor)}?product_id=#{product.id}"
+
+        expect(page).to have_selector(
+          "#shop-product-modal-container .reveal-modal", visible: :visible
+        )
+        expect(page).to have_content(product.name)
+      end
+
       context "product grid view", feature: :product_grid_view do
         let(:product3) {
           create(:simple_product, enterprise_id: supplier.id, name: "Tomatoes")
