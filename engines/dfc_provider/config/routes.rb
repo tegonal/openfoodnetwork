@@ -21,6 +21,7 @@ DfcProvider::Engine.routes.draw do
   end
   resources :supplied_products, only: [:index]
   resources :product_groups, only: [:show]
+  resources :categories, only: [:index, :show]
 
   resource :webid, only: [:show]
 

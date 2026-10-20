@@ -462,6 +462,75 @@ paths:
                     "@type": "@id"
                 dfc-b:stockLimitation: '3'
                 dfc-b:sku: new-sku
+  "/api/dfc/categories":
+    get:
+      summary: List categories
+      parameters:
+      - name: Accept
+        in: header
+        schema:
+          type: string
+      tags:
+      - Categories
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json; charset=utf-8:
+              examples:
+                successful:
+                  value:
+                    "@context": https://w3id.org/dfc/ontology/context/context_1.16.0.json
+                    "@graph":
+                    - "@id": http://test.host/api/dfc/categories/1
+                      "@type": skos:Concept
+                      skos:prefLabel: Vegetables
+                      dfc-b:dfc_id: https://github.com/datafoodconsortium/taxonomies/releases/latest/download/productTypes.rdf#vegetable
+                    - "@id": http://test.host/api/dfc/categories/2
+                      "@type": skos:Concept
+                      skos:prefLabel: Fruits
+                      dfc-b:dfc_id: https://github.com/datafoodconsortium/taxonomies/releases/latest/download/productTypes.rdf#fruit
+  "/api/dfc/categories/{id}":
+    get:
+      summary: Show category
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        schema:
+          type: string
+      tags:
+      - Categories
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json; charset=utf-8:
+              examples:
+                in DFC v1 format:
+                  value:
+                    "@context": https://w3id.org/dfc/ontology/context/context_1.16.0.json
+                    "@id": http://test.host/api/dfc/categories/1
+                    "@type": skos:Concept
+                    skos:prefLabel: Vegetables
+                    dfc-b:dfc_id: https://github.com/datafoodconsortium/taxonomies/releases/latest/download/productTypes.rdf#vegetable
+                    dfc-b:description: Fresh vegetables
+            application/ld+json; profile="dfc-v2"; charset=utf-8:
+              examples:
+                in DFC v2 format:
+                  value:
+                    "@context": https://w3id.org/dfc/ontology/context/context_2.0.0.json
+                    "@id": http://test.host/api/dfc/categories/1
+                    "@type": skos:Concept
+                    skos:prefLabel: Vegetables
+                    dfc-b:dfc_id: https://github.com/datafoodconsortium/taxonomies/releases/latest/download/productTypes.rdf#vegetable
+                    dfc-b:description: Fresh vegetables
+        '404':
+          description: not found
   "/api/dfc/enterprise_groups/{enterprise_group_id}/affiliated_by":
     post:
       summary: Add enterprise to group
@@ -653,14 +722,6 @@ paths:
                   value:
                     "@context": https://w3id.org/dfc/ontology/context/context_1.16.0.json
                     "@graph":
-                    - "@id": http://test.host/api/dfc/enterprises/10001
-                      "@type": dfc-b:Enterprise
-                      dfc-b:hasAddress: http://test.host/api/dfc/addresses/40001
-                      dfc-b:name: Fred's Icecream
-                      dfc-b:hasDescription: We use our strawberries to make icecream.
-                      dfc-b:VATnumber: 123 457
-                      dfc-b:hasMainContact: http://test.host/api/dfc/enterprises/10001#mainContact
-                      ofn:long_description: "<p>Hello, world!</p><p>This is a paragraph.</p>"
                     - "@id": http://test.host/api/dfc/enterprises/10000
                       "@type": dfc-b:Enterprise
                       dfc-b:hasAddress: http://test.host/api/dfc/addresses/40000
@@ -681,19 +742,20 @@ paths:
                       ofn:contact_name: Fred Farmer
                       ofn:logo_url: http://test.host/rails/active_storage/url/logo.png
                       ofn:promo_image_url: http://test.host/rails/active_storage/url/promo.png
-                    - "@id": http://test.host/api/dfc/enterprises/10001#mainContact
-                      "@type": dfc-b:Person
+                    - "@id": http://test.host/api/dfc/enterprises/10001
+                      "@type": dfc-b:Enterprise
+                      dfc-b:hasAddress: http://test.host/api/dfc/addresses/40001
+                      dfc-b:name: Fred's Icecream
+                      dfc-b:hasDescription: We use our strawberries to make icecream.
+                      dfc-b:VATnumber: 123 457
+                      dfc-b:hasMainContact: http://test.host/api/dfc/enterprises/10001#mainContact
+                      ofn:long_description: "<p>Hello, world!</p><p>This is a paragraph.</p>"
                     - "@id": http://test.host/api/dfc/enterprises/10000#mainContact
                       "@type": dfc-b:Person
                       dfc-b:firstName: Fred
                       dfc-b:familyName: Farmer
-                    - "@id": http://test.host/api/dfc/addresses/40001
-                      "@type": dfc-b:Address
-                      dfc-b:hasStreet: 42 Doveton Street
-                      dfc-b:hasPostalCode: '20170'
-                      dfc-b:hasCity: Herndon
-                      dfc-b:hasCountry: http://publications.europa.eu/resource/authority/country/AUS
-                      dfc-b:region: Victoria
+                    - "@id": http://test.host/api/dfc/enterprises/10001#mainContact
+                      "@type": dfc-b:Person
                     - "@id": http://test.host/api/dfc/addresses/40000
                       "@type": dfc-b:Address
                       dfc-b:hasStreet: 42 Doveton Street
@@ -702,6 +764,13 @@ paths:
                       dfc-b:hasCountry: http://publications.europa.eu/resource/authority/country/AUS
                       dfc-b:latitude: -25.345376
                       dfc-b:longitude: 131.0312006
+                      dfc-b:region: Victoria
+                    - "@id": http://test.host/api/dfc/addresses/40001
+                      "@type": dfc-b:Address
+                      dfc-b:hasStreet: 42 Doveton Street
+                      dfc-b:hasPostalCode: '20170'
+                      dfc-b:hasCity: Herndon
+                      dfc-b:hasCountry: http://publications.europa.eu/resource/authority/country/AUS
                       dfc-b:region: Victoria
                     - "@id": http://test.host/api/dfc/enterprises/10000/supplied_products/10001
                       "@type": dfc-b:SuppliedProduct
@@ -731,14 +800,6 @@ paths:
                   value:
                     "@context": https://w3id.org/dfc/ontology/context/context_1.16.0.json
                     "@graph":
-                    - "@id": http://test.host/api/dfc/enterprises/10001
-                      "@type": dfc-b:Enterprise
-                      dfc-b:hasAddress: http://test.host/api/dfc/addresses/40001
-                      dfc-b:name: Fred's Icecream
-                      dfc-b:hasDescription: We use our strawberries to make icecream.
-                      dfc-b:VATnumber: 123 457
-                      dfc-b:hasMainContact: http://test.host/api/dfc/enterprises/10001#mainContact
-                      ofn:long_description: "<p>Hello, world!</p><p>This is a paragraph.</p>"
                     - "@id": http://test.host/api/dfc/enterprises/10000
                       "@type": dfc-b:Enterprise
                       dfc-b:hasAddress: http://test.host/api/dfc/addresses/40000
@@ -759,19 +820,20 @@ paths:
                       ofn:contact_name: Fred Farmer
                       ofn:logo_url: http://test.host/rails/active_storage/url/logo.png
                       ofn:promo_image_url: http://test.host/rails/active_storage/url/promo.png
-                    - "@id": http://test.host/api/dfc/enterprises/10001#mainContact
-                      "@type": dfc-b:Person
+                    - "@id": http://test.host/api/dfc/enterprises/10001
+                      "@type": dfc-b:Enterprise
+                      dfc-b:hasAddress: http://test.host/api/dfc/addresses/40001
+                      dfc-b:name: Fred's Icecream
+                      dfc-b:hasDescription: We use our strawberries to make icecream.
+                      dfc-b:VATnumber: 123 457
+                      dfc-b:hasMainContact: http://test.host/api/dfc/enterprises/10001#mainContact
+                      ofn:long_description: "<p>Hello, world!</p><p>This is a paragraph.</p>"
                     - "@id": http://test.host/api/dfc/enterprises/10000#mainContact
                       "@type": dfc-b:Person
                       dfc-b:firstName: Fred
                       dfc-b:familyName: Farmer
-                    - "@id": http://test.host/api/dfc/addresses/40001
-                      "@type": dfc-b:Address
-                      dfc-b:hasStreet: 42 Doveton Street
-                      dfc-b:hasPostalCode: '20170'
-                      dfc-b:hasCity: Herndon
-                      dfc-b:hasCountry: http://publications.europa.eu/resource/authority/country/AUS
-                      dfc-b:region: Victoria
+                    - "@id": http://test.host/api/dfc/enterprises/10001#mainContact
+                      "@type": dfc-b:Person
                     - "@id": http://test.host/api/dfc/addresses/40000
                       "@type": dfc-b:Address
                       dfc-b:hasStreet: 42 Doveton Street
@@ -780,6 +842,13 @@ paths:
                       dfc-b:hasCountry: http://publications.europa.eu/resource/authority/country/AUS
                       dfc-b:latitude: -25.345376
                       dfc-b:longitude: 131.0312006
+                      dfc-b:region: Victoria
+                    - "@id": http://test.host/api/dfc/addresses/40001
+                      "@type": dfc-b:Address
+                      dfc-b:hasStreet: 42 Doveton Street
+                      dfc-b:hasPostalCode: '20170'
+                      dfc-b:hasCity: Herndon
+                      dfc-b:hasCountry: http://publications.europa.eu/resource/authority/country/AUS
                       dfc-b:region: Victoria
                     - "@id": http://test.host/api/dfc/enterprises/10000/supplied_products/10001
                       "@type": dfc-b:SuppliedProduct
