@@ -13,7 +13,7 @@
   - cache(*CacheService::FragmentCaching.ams_all_properties) do
     = inject_properties
 
-%shop.darkswarm
+%shop.darkswarm{ "data-controller": "shop-product-modal-auto-open" }
   - if @shopfront_layout == 'embedded'
     = render partial: 'shop/blocked_cookies'
 

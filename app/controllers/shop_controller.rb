@@ -52,7 +52,7 @@ class ShopController < BaseController
   def resolved_order_cycle
     return @resolved_order_cycle if defined?(@resolved_order_cycle)
 
-    @resolved_order_cycle = OrderCycle.find_by(id: params[:order_cycle_id])
+    @resolved_order_cycle = OrderCycle.find_by(id: params[:order_cycle_id]) || current_order_cycle
   end
 
   def inventory_enabled?
